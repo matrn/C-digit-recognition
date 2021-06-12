@@ -5,23 +5,7 @@ void matrix_alloc(matrix_t* mat, enum MATRIX_TYPE type, matrix_size_t rows, matr
 	mat->r = rows;
 	mat->c = cols;
 
-	mat->type_size = 0;
-	switch (type) {
-		case MATRIX_DOUBLE:
-			mat->type_size = sizeof(MATRIX_TYPE_DOUBLE);
-			break;
-		case MATRIX_TINYINT:
-			mat->type_size = sizeof(MATRIX_TYPE_TINYINT);
-			break;
-		case MATRIX_INT:
-			mat->type_size = sizeof(MATRIX_TYPE_INT);
-			break;
-		case MATRIX_BIGINT:
-			mat->type_size = sizeof(MATRIX_TYPE_BIGINT);
-			break;
-	}
-
-	mat->data = calloc(rows * cols, mat->type_size);
+	mat->data = calloc(rows * cols, sizeof(matrix_data_t));
 }
 
 void matrix_free(matrix_t* mat) {
@@ -30,19 +14,8 @@ void matrix_free(matrix_t* mat) {
 	mat->data = NULL;
 }
 
-double matrix_at_double(matrix_t* mat, matrix_size_t row, matrix_size_t col) {
-	switch (mat->type) {
-		case MATRIX_DOUBLE:
-			return ((MATRIX_TYPE_DOUBLE*)mat->data)[mat->r * row + col];
-		case MATRIX_TINYINT:
-			return ((MATRIX_TYPE_TINYINT*)mat->data)[mat->r * row + col];
-		case MATRIX_INT:
-			return ((MATRIX_TYPE_INT*)mat->data)[mat->r * row + col];
-		case MATRIX_BIGINT:
-			return ((MATRIX_TYPE_BIGINT*)mat->data)[mat->r * row + col];
-	}
-
-	return NULL;
+matrix_data_t matrix_at(matrix_t* mat, matrix_size_t row, matrix_size_t col) {
+	return mat->data[mat->r * row + col];
 }
 
 void matrix_print(matrix_t* mat) {
@@ -55,14 +28,11 @@ void matrix_print_wh(matrix_t* mat, bool header) {
 			case MATRIX_DOUBLE:
 				printf("double");
 				break;
-			case MATRIX_TINYINT:
-				printf("tinyint");
-				break;
 			case MATRIX_INT:
 				printf("int");
 				break;
-			case MATRIX_BIGINT:
-				printf("bigint");
+			case MATRIX_UINT:
+				printf("unsigned int");
 				break;
 		}
 		printf(": %dx%d\n", mat->r, mat->c);
@@ -72,16 +42,13 @@ void matrix_print_wh(matrix_t* mat, bool header) {
 		for (int c = 0; c < mat->c; c++) {
 			switch (mat->type) {
 				case MATRIX_DOUBLE:
-					printf("%8.3f", ((MATRIX_TYPE_DOUBLE*)mat->data)[mat->r * r + c]);
-					break;
-				case MATRIX_TINYINT:
-					printf("%4d", ((MATRIX_TYPE_TINYINT*)mat->data)[mat->r * r + c]);
+					printf("%8.3f", mat->data[mat->r * r + c].d);
 					break;
 				case MATRIX_INT:
-					printf("%6d", ((MATRIX_TYPE_INT*)mat->data)[mat->r * r + c]);
+					printf("%8ld", mat->data[mat->r * r + c].i);
 					break;
-				case MATRIX_BIGINT:
-					printf("%8ld", ((MATRIX_TYPE_BIGINT*)mat->data)[mat->r * r + c]);
+				case MATRIX_UINT:
+					printf("%8ld", mat->data[mat->r * r + c].u);
 					break;
 			}
 			if (c + 1 < mat->c) printf(" ");
@@ -96,22 +63,19 @@ matrix_rtn matrix_eye(matrix_t* mat) {
 		return MATRIX_WRONG_SIZE;
 	}
 
-	memset(mat->data, 0, mat->type_size*mat->r*mat->c);
+	memset(mat->data, 0, sizeof(matrix_data_t) * mat->r * mat->c);
 
 	for (int i = 0; i < mat->r; i++) {
 		printf("%d\n", mat->type);
 		switch (mat->type) {
 			case MATRIX_DOUBLE:
-				((MATRIX_TYPE_DOUBLE*)mat->data)[mat->r * i + i] = 1;
-				break;
-			case MATRIX_TINYINT:
-				((MATRIX_TYPE_TINYINT*)mat->data)[mat->r * i + i] = 1;
+				mat->data[mat->r * i + i].d = 1;
 				break;
 			case MATRIX_INT:
-				((MATRIX_TYPE_INT*)mat->data)[mat->r * i + i] = 1;
+				mat->data[mat->r * i + i].i = 1;
 				break;
-			case MATRIX_BIGINT: 
-				((MATRIX_TYPE_BIGINT*)mat->data)[mat->r * i + i] = 1;
+			case MATRIX_UINT:
+				mat->data[mat->r * i + i].u = 1;
 				break;
 		}
 	}
@@ -119,17 +83,44 @@ matrix_rtn matrix_eye(matrix_t* mat) {
 	return MATRIX_OK;
 }
 
+// double + anything = double
+// int + int/uint = int
+// uint + uint = uint
 
-matrix_rtn matrix_plus(matrix_t *out, matrix_t *a, matrix_t *b){
-	if(a->r != b->r || a->c != b->c){
+// double - anything = double
+// int/uint - int/uint = int
+
+// double * anything
+
+enum MATRIX_TYPE matrix_choose_type(matrix_t* a, matrix_t* b) {
+	if (a->type == MATRIX_DOUBLE || b->type == MATRIX_DOUBLE) return MATRIX_DOUBLE;
+	if (a->type == MATRIX_UINT && b->type == MATRIX_UINT) return MATRIX_UINT;
+	return MATRIX_INT;
+}
+
+
+matrix_rtn matrix_plus(matrix_t* out, matrix_t* a, matrix_t* b) {
+	if (a->r != b->r || a->c != b->c) {
 		dbgerrln("Different matrices sizes");
 		return MATRIX_WRONG_SIZE;
 	}
 
-	enum MATRIX_TYPE out_type = max(a->type, b->type);
+	out->type = matrix_choose_type(a, b);
+	if (out->r != a->r || out->c != a->c) {
+		out->r = a->r;
+		out->c = a->c;
 
-	if(out->data == NULL){
-		
+		if (out->data == NULL) {
+			out->data = malloc(sizeof(matrix_data_t) * out->r * out->c);
+		} else {
+			out->data = relloc(sizeof(matrix_data_t) * out->r * out->c);
+		}
+	}
+
+	for (int r = 0; r < out->r; r++) {
+		for (int c = 0; c < out->c; c++) {
+
+		}
 	}
 
 	return MATRIX_OK;
