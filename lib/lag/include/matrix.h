@@ -16,18 +16,21 @@
 
 #define MATRIX_TYPE_DOUBLE double
 #define MATRIX_TYPE_INT int64_t
+#define MATRIX_TYPE_UINT uint64_t
 
 #define MATRIX_WRONG_SIZE -1
 #define MATRIX_OK 0
 
 enum MATRIX_TYPE { MATRIX_DOUBLE,
-				   MATRIX_INT};
+				   MATRIX_INT,
+				   MATRIX_UINT };
 
 typedef int8_t matrix_rtn;
 
 typedef union {
 	MATRIX_TYPE_DOUBLE d;
 	MATRIX_TYPE_INT i;
+	MATRIX_TYPE_UINT u;
 } matrix_data_t;
 
 /*
@@ -46,12 +49,6 @@ typedef union {
 	NULL \
 )
 */
-
-#define MATRIX_AT(mat, row, col) (\
-	##mat->type == MATRIX_DOUBLE ? \
-		matrix_at(##mat, ##row, ##col).d : \
-		matrix_at(##mat, ##row, ##col).i \
-)
 
 typedef uint32_t matrix_size_t;
 
