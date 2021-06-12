@@ -16,21 +16,18 @@
 
 #define MATRIX_TYPE_DOUBLE double
 #define MATRIX_TYPE_INT int64_t
-#define MATRIX_TYPE_UINT uint64_t
 
 #define MATRIX_WRONG_SIZE -1
 #define MATRIX_OK 0
 
 enum MATRIX_TYPE { MATRIX_DOUBLE,
-				   MATRIX_INT,
-				   MATRIX_UINT };
+				   MATRIX_INT};
 
 typedef int8_t matrix_rtn;
 
 typedef union {
 	MATRIX_TYPE_DOUBLE d;
 	MATRIX_TYPE_INT i;
-	MATRIX_TYPE_UINT u;
 } matrix_data_t;
 
 /*
@@ -50,6 +47,12 @@ typedef union {
 )
 */
 
+#define MATRIX_AT(mat, row, col) (\
+	mat->type == MATRIX_DOUBLE ? \
+		matrix_at(mat, row, col)->d : \
+		matrix_at(mat, row, col)->i \
+)
+
 typedef uint32_t matrix_size_t;
 
 typedef struct Matrix {
@@ -59,15 +62,29 @@ typedef struct Matrix {
 	matrix_data_t* data;
 } matrix_t;
 
+
+void matrix_init(matrix_t *mat);
 void matrix_alloc(matrix_t* mat, enum MATRIX_TYPE type, matrix_size_t rows, matrix_size_t cols);
 void matrix_free(matrix_t* mat);
+void matrix_resize(matrix_t * mat, matrix_size_t rows, matrix_size_t cols);
+void matrix_zero(matrix_t * mat);
+
 matrix_rtn matrix_eye(matrix_t* mat);
 
-matrix_data_t matrix_at_double(matrix_t* mat, matrix_size_t row, matrix_size_t col);
-
-void matrix_print(matrix_t* mat);
-void matrix_print_wh(matrix_t* mat, bool header);  // with header
-
+/*
 enum MATRIX_TYPE matrix_choose_type(matrix_t * a, matrix_t *b);
+matrix_data_t* matrix_at(matrix_t* mat, matrix_size_t row, matrix_size_t col);
+MATRIX_TYPE_DOUBLE matrix_at_double(matrix_t* mat, matrix_size_t row, matrix_size_t col);
+MATRIX_TYPE_INT matrix_at_int(matrix_t* mat, matrix_size_t row, matrix_size_t col);
+*/
+
+void matrix_print(const matrix_t* mat);
+void matrix_print_wh(const matrix_t* mat, bool header);  // with header
+
+
+matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b);
+matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b);
+
+
 
 #endif
