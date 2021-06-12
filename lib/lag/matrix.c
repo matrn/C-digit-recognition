@@ -31,9 +31,6 @@ void matrix_print_wh(matrix_t* mat, bool header) {
 			case MATRIX_INT:
 				printf("int");
 				break;
-			case MATRIX_UINT:
-				printf("unsigned int");
-				break;
 		}
 		printf(": %dx%d\n", mat->r, mat->c);
 	}
@@ -46,9 +43,6 @@ void matrix_print_wh(matrix_t* mat, bool header) {
 					break;
 				case MATRIX_INT:
 					printf("%8ld", mat->data[mat->r * r + c].i);
-					break;
-				case MATRIX_UINT:
-					printf("%8ld", mat->data[mat->r * r + c].u);
 					break;
 			}
 			if (c + 1 < mat->c) printf(" ");
@@ -74,9 +68,6 @@ matrix_rtn matrix_eye(matrix_t* mat) {
 			case MATRIX_INT:
 				mat->data[mat->r * i + i].i = 1;
 				break;
-			case MATRIX_UINT:
-				mat->data[mat->r * i + i].u = 1;
-				break;
 		}
 	}
 
@@ -94,7 +85,7 @@ matrix_rtn matrix_eye(matrix_t* mat) {
 
 enum MATRIX_TYPE matrix_choose_type(matrix_t* a, matrix_t* b) {
 	if (a->type == MATRIX_DOUBLE || b->type == MATRIX_DOUBLE) return MATRIX_DOUBLE;
-	if (a->type == MATRIX_UINT && b->type == MATRIX_UINT) return MATRIX_UINT;
+	//if (a->type == MATRIX_UINT && b->type == MATRIX_UINT) return MATRIX_UINT;
 	return MATRIX_INT;
 }
 
@@ -119,7 +110,7 @@ matrix_rtn matrix_plus(matrix_t* out, matrix_t* a, matrix_t* b) {
 
 	for (int r = 0; r < out->r; r++) {
 		for (int c = 0; c < out->c; c++) {
-
+			MATRIX_AT(out, r, c) = MATRIX_AT(a, r, c) + MATRIX_AT(b, r, c);
 		}
 	}
 
