@@ -120,19 +120,13 @@ class NN:
 			layer = self.net[i]
 			right_layer_weights = self.net[i+1]['weights']
 
-			# error = layer['activation_function_derivative'](layer['activation'])*np.dot(np.insert(layer_next['weights'], 0, layer_next['bias']), next_layer_error)
-
-			# weights = np.c_[right_layer['weights'], right_layer['bias']]   #insert bias vector as column into weights matrix
-			#weights = right_layer['weights']
 			error = np.matmul(right_layer_weights.T, right_layer_delta)
 			delta = error * layer['activation_function_derivative'](layer['activation'])
 			right_layer_delta = delta
 			self.net[i]['delta_sum'] += delta
 
-			if i == 0:
-				output = input
-			else:
-				output = self.net[i-1]['output']
+			if i == 0: output = input
+			else: output = self.net[i-1]['output']
 
 			self.net[i]['grad_sum'] += np.matmul(np.atleast_2d(delta).T, np.atleast_2d(output))
 	
@@ -148,7 +142,7 @@ class NN:
 			layer['bias'] -= learning_rate*delta
 
 
-	def train(self, epochs = 5, batch_size = 32):
+	def train(self, epochs = 1, batch_size = 32):
 		for epoch in range(epochs):
 			print(f'Epoch #{epoch+1}')
 
@@ -198,3 +192,19 @@ if __name__ == '__main__':
 	print(np.argmax(nn.forward(nn.train_data[0, :, :].ravel())))
 	print(np.argmax(nn.forward(nn.train_data[1, :, :].ravel())))
 	#show_image(nn.train_data[1, :, :])
+
+
+	# from George Hotz's github ai notebook:
+	# can it recognize 4?
+	m = [[0,0,0,0,0,0,0],
+		[0,0,1,0,1,0,0],
+		[0,0,1,0,1,0,0],
+		[0,0,1,1,1,1,0],
+		[0,0,0,0,1,0,0],
+		[0,0,0,0,1,0,0],
+		[0,0,0,0,0,0,0]]
+	# upscale to 28x28
+	m = np.concatenate([np.concatenate([[x]*4 for x in y]*4) for y in m]).reshape(28, 28)
+	#show_image(m)
+	print(nn.forward(m.ravel()))
+	print(np.argmax(nn.forward(m.ravel())))
