@@ -74,9 +74,10 @@ class NN:
 				'bias': np.zeros(layer['output_dim']), # np.random.uniform(-1., 1., layer['output_dim'])/layer['output_dim'], #np.random.rand(layer['output_dim'])*0.0001,
 				'activation_function': ACTIVATION_FUNCTIONS[layer['activation']],
 				'activation_function_derivative' : ACTIVATION_FUNCTIONS[layer['activation']+'_derivative'],
+				
 				'activation' : np.zeros(layer['input_dim']),   # output of the layer before applying activaton function
 				'output' : layer['input_dim'],   # output of the layer after aplying activation function
-				'delta' : None,
+				'delta_sum' : np.zeros(layer['output_dim']),
 			})
 
 
@@ -100,34 +101,41 @@ class NN:
 		return output
 
 
+	def reset_delta_sum(self):
+		for layer in self.net:
+			layer['delta_sum'].zeros()
+			print(layer['delta_sum'])
+
 	def backpropagate(self, input, expected_output):
 		output_layer_output = self.forward(input)
 		output_layer_error = output_layer_output - expected_output   # derivative of cost function
 		output_layer_delta = output_layer_error * self.net[-1]['activation_function_derivative'](self.net[-1]['activation'])   # element wise matrix multiplication
 		
-		self.net[-1]['delta'] = output_layer_delta
 		right_layer_delta = output_layer_delta
+		self.net[-1]['delta_sum'] += output_layer_delta
+		
 		for i in range(len(self.net)-2, -1, -1): #, layer in enumerate(reversed(self.net[:-1])):
 			layer = self.net[i]
-			right_layer = self.net[i+1]
+			right_layer_weights = self.net[i+1]['weights']
 
 			# error = layer['activation_function_derivative'](layer['activation'])*np.dot(np.insert(layer_next['weights'], 0, layer_next['bias']), next_layer_error)
 
 			# weights = np.c_[right_layer['weights'], right_layer['bias']]   #insert bias vector as column into weights matrix
-			weights = right_layer['weights']
-			error = np.matmul(weights.T, right_layer_delta)
+			#weights = right_layer['weights']
+			error = np.matmul(right_layer_weights.T, right_layer_delta)
 			delta = error * layer['activation_function_derivative'](layer['activation'])
 			right_layer_delta = delta
-			self.net[i]['delta'] = delta
+			self.net[i]['delta_sum'] += delta
 	
 
-	def update(self, input, learning_rate = 0.001):
+	def update(self, input, learning_rate = 0.001, batch_size = 1):
 		output = input
 		for layer in self.net:
-			update = np.matmul(np.atleast_2d(layer['delta']).T, np.atleast_2d(output))
+			delta = layer['delta_sum']/batch_size
+			update = np.matmul(np.atleast_2d(delta).T, np.atleast_2d(output))
 			output = layer['output']
 			layer['weights'] -= learning_rate*update
-			layer['bias'] -= learning_rate*layer['delta']
+			layer['bias'] -= learning_rate*delta
 
 
 	def train(self, epochs = 1):
@@ -136,6 +144,7 @@ class NN:
 			for i in range(0, 6000):
 				out = np.zeros(10)
 				out[int(self.train_labels[i])] = 1
+				self.reset_delta_sum()
 				self.backpropagate(self.train_data[i, :, :].ravel(), out)
 				self.update(self.train_data[i, :, :].ravel())
 
