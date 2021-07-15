@@ -1,4 +1,4 @@
-from numpy.lib.function_base import _gradient_dispatcher
+from numpy.lib.function_base import _gradient_dispatcher, percentile
 from utils import load_mnist_images, load_mnist_labels, show_image
 import numpy as np
 
@@ -15,7 +15,7 @@ nn_layout = [
 		'name': 'hidden_layer',
 		'input_dim': 784,
 		'output_dim': 300,
-		'activation': 'relu',
+		'activation': 'sigmoid',
 	},
 	{
 		'name': 'output_layer',
@@ -126,7 +126,7 @@ class NN:
 		#print(output_layer_error)
 		output_layer_gradient = output_layer_error*self.net[-1]['activation_function_derivative'](self.net[-1]['activation'])
 		
-		print(output_layer_gradient)
+		#print(output_layer_gradient)
 		self.net[-1]['gradient'] = output_layer_gradient
 		right_layer_gradient = output_layer_gradient
 		#print(right_layer_gradient)
@@ -160,6 +160,7 @@ class NN:
 			error = np.dot(weights.T, right_layer_gradient)
 			#print(error.shape)
 			gradient = error*layer['activation_function_derivative'](layer['activation'])
+			#print(gradient)
 			right_layer_gradient = gradient
 			self.net[i]['gradient'] = gradient
 			#print(gradient.shape)
@@ -187,16 +188,34 @@ if __name__ == '__main__':
 	#print(type(nn.train_labels[0]))
 	
 	#print(out)
-	
-	for a in range(0, 1):
-		out = np.zeros(10)
-		out[int(nn.train_labels[a])] = 1
-		nn.backpropagation(nn.train_data[a, :, :].ravel(), out)
-		nn.update(nn.train_data[a, :, :].ravel())
-	
+	for _ in range(4):
+		for a in range(0, 60000):
+			out = np.zeros(10)
+			out[int(nn.train_labels[a])] = 1
+			nn.backpropagation(nn.train_data[a, :, :].ravel(), out)
+			nn.update(nn.train_data[a, :, :].ravel())
+		
+	# test
+	correct = 0
+	wrong = 0
+	for i in range(10000):
+		predicted = np.argmax(nn.forward(nn.test_data[i, :, :].ravel()))
+		expected = int(nn.test_labels[i])
+		#print(f'{predicted} vs {expected}')
+		if predicted == expected:
+			correct += 1
+		else:
+			wrong += 1
+		
+	print(f'Correct {correct}, wrong: {wrong}')
+	print(f'Accuracy {correct/10000.} %')
+
 	#print(nn.net)
 
 	print(nn.forward(nn.train_data[0, :, :].ravel()))
 	print(nn.forward(nn.train_data[1, :, :].ravel()))
+
+	print(np.argmax(nn.forward(nn.train_data[0, :, :].ravel())))
+	print(np.argmax(nn.forward(nn.train_data[1, :, :].ravel())))
 	#show_image(nn.train_data[1, :, :])
 	#print(nn.net)
