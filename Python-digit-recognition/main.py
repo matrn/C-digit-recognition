@@ -78,6 +78,7 @@ class NN:
 				'activation' : np.zeros(layer['input_dim']),   # output of the layer before applying activaton function
 				'output' : layer['input_dim'],   # output of the layer after aplying activation function
 				'delta_sum' : np.zeros(layer['output_dim']),
+				'grad_sum' : np.zeros((layer['output_dim'], layer['input_dim'])),
 			})
 
 
@@ -103,8 +104,8 @@ class NN:
 
 	def reset_delta_sum(self):
 		for layer in self.net:
-			layer['delta_sum'].zeros()
-			print(layer['delta_sum'])
+			layer['delta_sum'] = np.zeros(layer['delta_sum'].shape)
+			layer['grad_sum'] = np.zeros(layer['grad_sum'].shape)
 
 	def backpropagate(self, input, expected_output):
 		output_layer_output = self.forward(input)
@@ -113,7 +114,8 @@ class NN:
 		
 		right_layer_delta = output_layer_delta
 		self.net[-1]['delta_sum'] += output_layer_delta
-		
+		self.net[-1]['grad_sum'] += np.matmul(np.atleast_2d(output_layer_delta).T, np.atleast_2d(self.net[-2]['output']))
+
 		for i in range(len(self.net)-2, -1, -1): #, layer in enumerate(reversed(self.net[:-1])):
 			layer = self.net[i]
 			right_layer_weights = self.net[i+1]['weights']
@@ -126,27 +128,39 @@ class NN:
 			delta = error * layer['activation_function_derivative'](layer['activation'])
 			right_layer_delta = delta
 			self.net[i]['delta_sum'] += delta
+
+			if i == 0:
+				output = input
+			else:
+				output = self.net[i-1]['output']
+
+			self.net[i]['grad_sum'] += np.matmul(np.atleast_2d(delta).T, np.atleast_2d(output))
 	
 
 	def update(self, input, learning_rate = 0.001, batch_size = 1):
-		output = input
+		#output = input
 		for layer in self.net:
 			delta = layer['delta_sum']/batch_size
-			update = np.matmul(np.atleast_2d(delta).T, np.atleast_2d(output))
-			output = layer['output']
-			layer['weights'] -= learning_rate*update
+			grad = layer['grad_sum']/batch_size
+			#update = np.matmul(np.atleast_2d(delta).T, np.atleast_2d(output))
+			#output = layer['output']
+			layer['weights'] -= learning_rate*grad
 			layer['bias'] -= learning_rate*delta
 
 
-	def train(self, epochs = 1):
+	def train(self, epochs = 5, batch_size = 32):
 		for epoch in range(epochs):
-			print(f'Epoch #{epoch}')
-			for i in range(0, 6000):
-				out = np.zeros(10)
-				out[int(self.train_labels[i])] = 1
+			print(f'Epoch #{epoch+1}')
+
+			data_len = 60000
+			for batch in np.array_split(np.arange(data_len), data_len/batch_size):
 				self.reset_delta_sum()
-				self.backpropagate(self.train_data[i, :, :].ravel(), out)
-				self.update(self.train_data[i, :, :].ravel())
+				#print(batch)
+				for i in batch:
+					out = np.zeros(10)
+					out[int(self.train_labels[i])] = 1				
+					self.backpropagate(self.train_data[i, :, :].ravel(), out)
+				self.update(self.train_data[i, :, :].ravel(), batch_size = len(batch))
 
 
 	def test(self):
