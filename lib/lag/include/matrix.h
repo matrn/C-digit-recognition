@@ -75,4 +75,8 @@ matrix_rtn matrix_add_scalar(matrix_t * out, const matrix_t * mat, MATRIX_TYPE s
 matrix_rtn matrix_sub_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * mat);
 matrix_rtn matrix_sub_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE scalar);
 
+void random_seed(unsigned int seed);
+
+matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val);
+
 #endif

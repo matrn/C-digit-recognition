@@ -4,11 +4,13 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 #include "../../lag/include/lag.h"
+#include "mnist.h"
 
-
-enum ceural_activation { CEURAL_RELU,
-						 CEURAL_SIGMOID };
+enum ceural_activation { ACTIVATION_RELU,
+						 ACTIVATION_SIGMOID };
 
 typedef struct CeuralLayerDefinition {
 	char* name;
@@ -26,8 +28,8 @@ typedef struct CeuralNetworkDefinition {
 typedef struct CeuralLayer {
 	matrix_t weights;
 	matrix_t bias;
-	matrix_t (*activation_function)(matrix_t);
-	matrix_t (*activation_function_derivative)(matrix_t);
+	matrix_t * (*activation_function)(matrix_t *);
+	matrix_t * (*activation_function_derivative)(matrix_t *);
 	
 	// memory:
 	matrix_t sum;
@@ -47,5 +49,12 @@ typedef struct Ceuralnet {
 
 void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t* nn_def);
 void ceural_net_free(ceural_net_t * nn);
+
+
+matrix_t * ceural_relu(matrix_t * z);
+matrix_t * ceural_relu_derivative(matrix_t * z);
+matrix_t * ceural_sigmoid(matrix_t * z);
+matrix_t * ceural_sigmoid_derivative(matrix_t *z);
+
 
 #endif

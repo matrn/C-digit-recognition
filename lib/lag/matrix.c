@@ -326,3 +326,19 @@ matrix_rtn matrix_sub_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE scalar
 
 	return MATRIX_OK;
 }
+
+
+void random_seed(unsigned int seed){
+	srand(seed);
+}
+
+
+matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val){
+	// note that rand() function is not secure for security purposes
+
+	for(int i = 0; i < out->r*out->c; i ++){
+		out->data[i] = rand()/(RAND_MAX/(max_val-min_val)) + min_val;
+	}
+
+	return MATRIX_OK;
+}

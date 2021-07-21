@@ -2,7 +2,7 @@ CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG
 LDFLAGS+=-lm
 
 
-ceural: main.c ceural.c activations.c ../../obj/lag.o
+ceural: main.c ceural.c activations.c mnist.c ../../obj/lag.o
 	cd ../lag && $(MAKE) lag.o
 	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
