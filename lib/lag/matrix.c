@@ -46,6 +46,10 @@ MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matri
 	return &mat->data[mat->r * row + col];
 }
 
+MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
+	return mat->data[mat->r * row + col];
+}
+
 
 void matrix_print(const matrix_t* mat) {
 	matrix_print_wh(mat, false);
@@ -58,7 +62,7 @@ void matrix_print_wh(const matrix_t* mat, bool header) {
 
 	for (int r = 0; r < mat->r; r++) {
 		for (int c = 0; c < mat->c; c++) {
-			printf("%8.3f", mat->data[mat->r * r + c]);
+			printf("%8.2f", mat->data[mat->r * r + c]);
 			if (c + 1 < mat->c) printf(" ");
 		}
 		printf("\n");
@@ -127,18 +131,34 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 
 	matrix_resize(out, a->r, b->c);
 
-	for (int ar = 0; ar < a->r; ar++) {
-		for (int ac = 0; ac < a->c; ac ++) {
+	for (int row = 0; row < a->r; row ++) {
+		for (int col = 0; col < a->c; col ++) {
 			MATRIX_TYPE sum = 0;
-			for(int b)
-			if (out->type == MATRIX_DOUBLE) {
-				matrix_at(out, r, c)->d = matrix_at_double(a, r, c) + matrix_at_double(b, r, c);
-			} else {
-				matrix_at(out, r, c)->i = matrix_at_int(a, r, c) + matrix_at_int(b, r, c);
+			for(int c = 0; c < b->c; c ++){
+				sum += matrix_atv(a, row, c)*matrix_atv(b, c, col);
 			}
+			printf("%f\n", sum);
+			*matrix_at(out, row, col) = sum;
 		}
 	}
 
 	return MATRIX_OK;
 }
-*/
+
+
+matrix_rtn matrix_multiply_ew(matrix_t* out, const matrix_t* a, const matrix_t* b) {
+	if (a->r != b->r || a->c != b->c) {
+		dbgerrln("Different matrices sizes");
+		return MATRIX_WRONG_SIZE;
+	}
+
+	matrix_resize(out, a->r, a->c);
+
+	for (int r = 0; r < out->r; r++) {
+		for (int c = 0; c < out->c; c++) {
+			*matrix_at(out, r, c) = matrix_atv(a, r, c)*matrix_atv(b, r, c);
+		}
+	}
+
+	return MATRIX_OK;
+}

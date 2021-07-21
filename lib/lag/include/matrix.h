@@ -44,6 +44,8 @@ void matrix_print_wh(const matrix_t* mat, bool header);  // with header
 
 matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b);
 matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b);
+matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b);
+matrix_rtn matrix_multiply_ew(matrix_t* out, const matrix_t* a, const matrix_t* b);
 
 
 

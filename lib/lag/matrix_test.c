@@ -12,7 +12,11 @@ int main(){
 	matrix_print_wh(&mat, true);
 
 	matrix_add(&out, &mat, &mat);
+	matrix_print_wh(&out, true);
 
+	matrix_zero(&out);
+	
+	matrix_multiply(&out, &mat, &mat);
 	matrix_print_wh(&out, true);
 
 	matrix_free(&mat);
