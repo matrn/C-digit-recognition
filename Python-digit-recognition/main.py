@@ -3,10 +3,10 @@ from utils import load_mnist_images, load_mnist_labels, show_image
 import numpy as np
 
 
-train_filename = ('./data/train-images-idx3-ubyte',
-				  './data/train-labels-idx1-ubyte')
-test_filename = ('./data/t10k-images-idx3-ubyte',
-				 './data/t10k-labels-idx1-ubyte')
+train_filename = ('../data/train-images-idx3-ubyte',
+				  '../data/train-labels-idx1-ubyte')
+test_filename = ('../data/t10k-images-idx3-ubyte',
+				 '../data/t10k-labels-idx1-ubyte')
 
 # 2 - layer: input layer (input_layer_len), 300 hidden units, output layer (10)
 nn_layout = [
@@ -76,7 +76,7 @@ class NN:
 				'activation_function_derivative' : ACTIVATION_FUNCTIONS[layer['activation']+'_derivative'],
 				
 				'activation' : np.zeros(layer['input_dim']),   # output of the layer before applying activaton function
-				'output' : layer['input_dim'],   # output of the layer after aplying activation function
+				'output' : np.zeros(layer['input_dim']),   # output of the layer after aplying activation function
 				'delta_sum' : np.zeros(layer['output_dim']),
 				'grad_sum' : np.zeros((layer['output_dim'], layer['input_dim'])),
 			})
