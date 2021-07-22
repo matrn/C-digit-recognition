@@ -28,16 +28,16 @@ void mnist_labels_free(mnist_labels_t* labels);
 
 
 
+typedef uint8_t mnist_pixel_t;
+
 typedef struct MNISTImages {
 	int32_t length;
 	int32_t rows, cols;
-	uint8_t ** data;
+	mnist_pixel_t ** data;
 } mnist_images_t;
 
 mnist_rtn mnist_images_load(mnist_images_t* images, char* filename);
 void mnist_images_free(mnist_images_t* images);
-
-
 
 
 

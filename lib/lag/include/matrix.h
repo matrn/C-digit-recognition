@@ -79,4 +79,11 @@ void random_seed(unsigned int seed);
 
 matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val);
 
+
+matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b, matrix_size_t rows, matrix_size_t cols);
+
+
+matrix_size_t matrix_get_rows(matrix_t * mat);
+matrix_size_t matrix_get_cols(matrix_t * mat);
+
 #endif

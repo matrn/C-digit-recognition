@@ -77,11 +77,12 @@ mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 
 
 		images->length = items_num;
-		images->data = (uint8_t **)malloc(items_num*rows*cols*sizeof(uint8_t));
+		images->data = (mnist_pixel_t **)malloc(items_num*sizeof(mnist_pixel_t *));
 
 		for(int i = 0; i < items_num; i ++){
+			images->data[i] = (mnist_pixel_t *)malloc(rows*cols*sizeof(mnist_pixel_t));
 
-			if(fread(&images->data[i], rows*cols, 1, f) != 1){
+			if(fread(images->data[i], sizeof(mnist_pixel_t), rows*cols, f) != rows*cols){
 				fclose(f);
 				return MNIST_PARSE_ERROR;
 			}
@@ -95,11 +96,16 @@ mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 }
 
 
+
 void mnist_images_free(mnist_images_t* images){
 	if(images->data == NULL) return;
 
 	// for(int i = 0; i < images->length; i ++){
 	// 	matrix_free(&images->data[i]);
 	// }
+	for(int i = 0; i < images->length; i ++){
+		free(images->data[i]);
+	}
+	
 	free(images->data);
 }

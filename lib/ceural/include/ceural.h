@@ -49,7 +49,7 @@ typedef struct Ceuralnet {
 
 void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t* nn_def);
 void ceural_net_free(ceural_net_t * nn);
-
+void ceural_net_forward(MATRIX_TYPE * output, ceural_net_t * nn, mnist_pixel_t * input);
 
 matrix_t * ceural_relu(matrix_t * z);
 matrix_t * ceural_relu_derivative(matrix_t * z);

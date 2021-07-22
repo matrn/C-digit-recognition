@@ -54,11 +54,15 @@ void matrix_zero(matrix_t* mat) {
 }
 
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
-	return &mat->data[mat->r * row + col];
+	if(row > mat->r) dbgerrln("Row is outside of matrix!");
+	if(col > mat->c) dbgerrln("Col is outside of matrix!");
+	return &mat->data[mat->c * row + col];
 }
 
 MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
-	return mat->data[mat->r * row + col];
+	if(row > mat->r) dbgerrln("Row is outside of matrix!");
+	if(col > mat->c) dbgerrln("Col is outside of matrix!");
+	return mat->data[mat->c * row + col];
 }
 
 
@@ -73,7 +77,7 @@ void matrix_print_wh(const matrix_t* mat, bool header) {
 
 	for (int r = 0; r < mat->r; r++) {
 		for (int c = 0; c < mat->c; c++) {
-			printf("%8.2f", mat->data[mat->r * r + c]);
+			printf("%8.2f", mat->data[r*mat->c + c]);
 			if (c + 1 < mat->c) printf(" ");
 		}
 		printf("\n");
@@ -143,7 +147,7 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 	matrix_resize(out, a->r, b->c);
 
 	for (int row = 0; row < a->r; row ++) {
-		for (int col = 0; col < a->c; col ++) {
+		for (int col = 0; col < b->c; col ++) {
 			MATRIX_TYPE sum = 0;
 			for(int c = 0; c < b->c; c ++){
 				sum += matrix_atv(a, row, c)*matrix_atv(b, c, col);
@@ -341,4 +345,46 @@ matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val)
 	}
 
 	return MATRIX_OK;
+}
+
+
+
+
+
+matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b, matrix_size_t rows, matrix_size_t cols){
+	if (a->c != rows) {
+		dbgerrln("Wrong matrices sizes");
+		return MATRIX_WRONG_SIZE;
+	}
+
+	//matrix_print_wh(out, true);
+	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
+	matrix_resize(out, a->r, cols);
+	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
+	
+
+	for (int row = 0; row < a->r; row ++) {
+		for (int col = 0; col < cols; col ++) {
+			MATRIX_TYPE sum = 0;
+			for(int c = 0; c < cols; c ++){
+				//printf("index: %d\n", c*rows+col);
+				sum += matrix_atv(a, row, c)*b[c*rows+col];
+			}
+			//printf("%dx%d: %f\n", row, col, sum);
+			//printf("val: %f\n", *matrix_at(out, row, col));
+			*matrix_at(out, row, col) = sum;
+		}
+	}
+
+	return MATRIX_OK;
+}
+
+
+
+
+matrix_size_t matrix_get_rows(matrix_t * mat){
+	return mat->r;
+}
+matrix_size_t matrix_get_cols(matrix_t * mat){
+	return mat->c;
 }

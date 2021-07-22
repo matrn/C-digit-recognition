@@ -18,8 +18,8 @@ void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 
 		matrix_alloc(&nn->layers[i].bias, layer->output_dim, 1);
 		
-		matrix_alloc(&nn->layers[i].sum, layer->input_dim, 1);
-		matrix_alloc(&nn->layers[i].output, layer->input_dim, 1);
+		matrix_alloc(&nn->layers[i].sum, layer->output_dim, 1);
+		matrix_alloc(&nn->layers[i].output, layer->output_dim, 1);
 		matrix_alloc(&nn->layers[i].delta_sum, layer->output_dim, 1);
 		matrix_alloc(&nn->layers[i].grad_sum, layer->output_dim, layer->input_dim);
 
@@ -51,4 +51,20 @@ void ceural_net_free(ceural_net_t * nn){
 	}
 
 	free(nn->layers);
+}
+
+
+void ceural_net_forward(MATRIX_TYPE * output, ceural_net_t * nn, mnist_pixel_t * input){
+	ceural_layer_t input_layer = nn->layers[0];
+
+	// printf("size: %ld\n", sizeof(input[0]));
+	// for(int i = 0; i < matrix_get_cols(&input_layer.weights); i ++){
+	// 	printf("#%d: %d\n", i, input[i]);
+	// }
+
+	//matrix_t * sum = matrix_new();
+	matrix_multiply_r1ubyteMat(&input_layer.sum, &input_layer.weights, input, matrix_get_cols(&input_layer.weights), 1);    // input_dim, 1
+	matrix_add(&input_layer.sum, &input_layer.sum, &input_layer.bias);
+
+
 }
