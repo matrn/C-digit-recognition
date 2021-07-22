@@ -127,8 +127,8 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 		matrix_t * right_layer_weights = &nn->layers[i+1].weights;
 
 		matrix_t * error = matrix_new();
-		matrix_print_size(right_layer_weights);
-		matrix_print_size(right_layer_delta);
+		// matrix_print_size(right_layer_weights);
+		// matrix_print_size(right_layer_delta);
 
 		matrix_t * weights_copy = matrix_new();
 		matrix_transpose(weights_copy, right_layer_weights);
@@ -144,7 +144,7 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 		matrix_add(&layer->delta_sum, &layer->delta_sum, delta);
 
 		matrix_t * grad = matrix_new();
-		matrix_print_size(delta);
+		// matrix_print_size(delta);
 		//matrix_print_size(&nn->layers[i-1].output);
 		//matrix_transpose(delta, delta);
 		if(i == 0){
@@ -198,13 +198,15 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 	for(int epoch = 0; epoch < epochs; epoch ++){
 		printf("Epoch #%d\n", epoch +1);
 
-		for(int i = 0; i < train_set->images.length; i ++){
+		//int set_len = train_set->images->length;
+		int set_len = 100;
+		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
-			if(batch_fin > train_set->images.length) batch_fin = train_set->images.length;
+			if(batch_fin > set_len) batch_fin = set_len;
 
 			for(; i < batch_fin; i ++){
 				printf("i: %d\n", i);
-				ceural_net_backpropagate(nn, train_set->images.data[i], train_set->labels.data[i]);
+				ceural_net_backpropagate(nn, train_set->images->data[i], train_set->labels->data[i]);
 			}
 			ceural_net_update_weigts(nn, 0.001, batch_size);
 		}

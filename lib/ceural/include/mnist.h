@@ -43,8 +43,8 @@ void mnist_images_free(mnist_images_t* images);
 
 
 typedef struct MNISTSet {
-	mnist_images_t images;
-	mnist_labels_t labels;
+	mnist_images_t * images;
+	mnist_labels_t * labels;
 } mnist_set_t;
 
 

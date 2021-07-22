@@ -35,7 +35,7 @@ void matrix_delete(matrix_t * mat){
 
 void matrix_copy(matrix_t * dst, matrix_t * src){
 	if(dst == src){
-		dbgln("Destination is same as the source, not copying");
+		//dbgln("Destination is same as the source, not copying");
 		return;
 	}
 	matrix_resize(dst, src->r, src->c);
@@ -414,7 +414,7 @@ matrix_size_t matrix_get_cols(matrix_t * mat){
 void matrix_transpose(matrix_t * dst, matrix_t * src){
 	if(src->r == 1 || src->c == 1){
 		if(dst == src){
-			dbgln("Dst == src");
+			//dbgln("Dst == src");
 		}
 		else{
 			matrix_copy(dst, src);
@@ -428,7 +428,7 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){
 	matrix_size_t tmp = dst->r;
 		dst->r = dst->c;
 		dst->c = tmp;
-		
+
 	for (int i = 0; i < dst->r; ++i) {
 		for (int j = i; j < dst->c; ++j) {
 			MATRIX_TYPE temp = matrix_atv(dst, i, j);
