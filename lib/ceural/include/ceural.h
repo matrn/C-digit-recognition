@@ -47,14 +47,20 @@ typedef struct Ceuralnet {
 } ceural_net_t;
 
 
-void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t* nn_def);
-void ceural_net_free(ceural_net_t * nn);
-void ceural_net_forward(MATRIX_TYPE * output, ceural_net_t * nn, mnist_pixel_t * input);
-
 void ceural_relu(matrix_t * out, matrix_t * z);
 void ceural_relu_derivative(matrix_t * out, matrix_t * z);
 void ceural_sigmoid(matrix_t * out, matrix_t * z);
 void ceural_sigmoid_derivative(matrix_t * out, matrix_t * z);
 
+
+
+void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t* nn_def);
+void ceural_net_free(ceural_net_t * nn);
+void ceural_net_forward(ceural_net_t * nn, matrix_t * output, mnist_pixel_t * input);
+void ceural_net_reset_sums(ceural_net_t * nn);
+void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_label_t expected_output);
+void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t batch_size);
+void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size);
+void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set);
 
 #endif

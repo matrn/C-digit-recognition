@@ -36,13 +36,15 @@ int main(){
 	// printf("size: %ld\n", sizeof(train_images.data[0][1]));
 	// printf("data0: %d\n", train_images.data[0][0]);
 
-	double * out = calloc(10, sizeof(double));
-	ceural_net_forward(out, &nn, train_images.data[0]);
+	matrix_t * out = matrix_new(); //calloc(10, sizeof(double));
+	ceural_net_forward(&nn, out, train_images.data[0]);
 	for(int i = 0; i < 10; i ++) printf("%-8d", i);
 	printf("\n");
-	for(int i = 0; i < 10; i ++) printf("%-8.3f", out[i]);
+	for(int i = 0; i < 10; i ++) printf("%-8.3f", matrix_atv(out, i, 0));
 	printf("\n");
-	free(out);
+	matrix_delete(out);
+	
+	ceural_net_backpropagate(&nn, train_images.data[0], train_labels.data[0]);
 
 	mnist_labels_free(&train_labels);
 	mnist_images_free(&train_images);

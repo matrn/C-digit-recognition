@@ -106,6 +106,14 @@ void mnist_images_free(mnist_images_t* images){
 	for(int i = 0; i < images->length; i ++){
 		free(images->data[i]);
 	}
-	
+
 	free(images->data);
+}
+
+
+
+void mnist_label_vectorize(matrix_t * label_mat, mnist_label_t label){
+	matrix_resize(label_mat, 10, 1);
+	matrix_zero(label_mat);
+	*matrix_at(label_mat, label, 0) = 1;
 }

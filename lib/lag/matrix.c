@@ -2,7 +2,11 @@
 
 
 matrix_t * matrix_new(){
-	return malloc(sizeof(matrix_t));
+	matrix_t * new_mat = malloc(sizeof(matrix_t));
+	new_mat->data = NULL;
+	new_mat->r = -1;
+	new_mat->c = -1;
+	return new_mat;
 }
 
 
@@ -24,7 +28,16 @@ void matrix_free(matrix_t* mat) {
 	mat->data = NULL;
 }
 
+void matrix_delete(matrix_t * mat){
+	matrix_free(mat);
+	free(mat);
+}
+
 void matrix_copy(matrix_t * dst, matrix_t * src){
+	if(dst == src){
+		dbgln("Destination is same as the source, not copying");
+		return;
+	}
 	matrix_resize(dst, src->r, src->c);
 	memcpy(dst->data, src->data, src->r*src->c*sizeof(MATRIX_TYPE));
 }
@@ -68,6 +81,10 @@ MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matri
 
 void matrix_print(const matrix_t* mat) {
 	matrix_print_wh(mat, false);
+}
+
+void matrix_print_size(const matrix_t * mat){
+		printf("Mat: %dx%d\n", mat->r, mat->c);
 }
 
 void matrix_print_wh(const matrix_t* mat, bool header) {
@@ -389,4 +406,34 @@ matrix_size_t matrix_get_rows(matrix_t * mat){
 }
 matrix_size_t matrix_get_cols(matrix_t * mat){
 	return mat->c;
+}
+
+
+
+
+void matrix_transpose(matrix_t * dst, matrix_t * src){
+	if(src->r == 1 || src->c == 1){
+		if(dst == src){
+			dbgln("Dst == src");
+		}
+		else{
+			matrix_copy(dst, src);
+		}
+		matrix_size_t tmp = dst->r;
+		dst->r = dst->c;
+		dst->c = tmp;
+		return;
+	}
+	matrix_copy(dst, src);
+	matrix_size_t tmp = dst->r;
+		dst->r = dst->c;
+		dst->c = tmp;
+		
+	for (int i = 0; i < dst->r; ++i) {
+		for (int j = i; j < dst->c; ++j) {
+			MATRIX_TYPE temp = matrix_atv(dst, i, j);
+			*matrix_at(dst, i, j) = matrix_atv(dst, j, i);
+			*matrix_at(dst, j, i) = temp;
+		}
+	}
 }

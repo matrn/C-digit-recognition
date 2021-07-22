@@ -12,10 +12,10 @@ void ceural_relu(matrix_t * out, matrix_t * z){
 
 void ceural_relu_derivative(matrix_t * out, matrix_t * z){
 	//matrix_t * out = matrix_new();
-	out->data = NULL;
+	//out->data = NULL;
 	matrix_copy(out, z);
 
-	for(int i = 0; i < z->r*z->c; z ++){
+	for(int i = 0; i < z->r * z->c; i ++){
 		out->data[i] = z->data[i] <= 0 ? 0 : 1;
 	}
 
@@ -47,5 +47,6 @@ void ceural_sigmoid_derivative(matrix_t * out, matrix_t * z){
 	matrix_sub_lscalar(out, 1, z_sigmoid);
 	matrix_multiply_ew(out, z_sigmoid, out);
 
+	matrix_delete(z_sigmoid);
 	//return out;
 }

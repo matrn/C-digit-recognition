@@ -36,6 +36,7 @@ matrix_t * matrix_new();
 void matrix_init(matrix_t *mat);
 void matrix_alloc(matrix_t* mat, matrix_size_t rows, matrix_size_t cols);
 void matrix_free(matrix_t* mat);
+void matrix_delete(matrix_t * mat);
 void matrix_copy(matrix_t * dst, matrix_t * src);
 void matrix_resize(matrix_t * mat, matrix_size_t rows, matrix_size_t cols);
 void matrix_zero(matrix_t * mat);
@@ -44,6 +45,7 @@ matrix_rtn matrix_eye(matrix_t* mat);
 
 void matrix_print(const matrix_t* mat);
 void matrix_print_wh(const matrix_t* mat, bool header);  // with header
+void matrix_print_size(const matrix_t * mat);
 
 
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
@@ -88,5 +90,8 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b,
 
 matrix_size_t matrix_get_rows(matrix_t * mat);
 matrix_size_t matrix_get_cols(matrix_t * mat);
+
+
+void matrix_transpose(matrix_t * dst, matrix_t * src);
 
 #endif
