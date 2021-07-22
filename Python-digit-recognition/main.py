@@ -75,8 +75,8 @@ class NN:
 				'activation_function': ACTIVATION_FUNCTIONS[layer['activation']],
 				'activation_function_derivative' : ACTIVATION_FUNCTIONS[layer['activation']+'_derivative'],
 				
-				'activation' : np.zeros(layer['input_dim']),   # output of the layer before applying activaton function
-				'output' : np.zeros(layer['input_dim']),   # output of the layer after aplying activation function
+				'activation' : np.zeros(layer['output_dim']),   # output of the layer before applying activaton function
+				'output' : np.zeros(layer['output_dim']),   # output of the layer after aplying activation function
 				'delta_sum' : np.zeros(layer['output_dim']),
 				'grad_sum' : np.zeros((layer['output_dim'], layer['input_dim'])),
 			})
