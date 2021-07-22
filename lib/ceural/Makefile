@@ -7,7 +7,7 @@ ceural: main.c ceural.c activations.c mnist.c ../../obj/lag.o
 	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 ceural_test: ceural
-	valgrind ./ceural
+	valgrind --leak-check=full ./ceural
 
 clean:
 	rm -f ceural

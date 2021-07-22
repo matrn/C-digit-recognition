@@ -40,7 +40,7 @@ int main(){
 	ceural_net_forward(out, &nn, train_images.data[0]);
 	for(int i = 0; i < 10; i ++) printf("%-8d", i);
 	printf("\n");
-	for(int i = 0; i < 10; i ++) printf("%-8.2f", out[i]);
+	for(int i = 0; i < 10; i ++) printf("%-8.3f", out[i]);
 	printf("\n");
 	free(out);
 

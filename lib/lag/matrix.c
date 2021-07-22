@@ -54,14 +54,14 @@ void matrix_zero(matrix_t* mat) {
 }
 
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
-	if(row > mat->r) dbgerrln("Row is outside of matrix!");
-	if(col > mat->c) dbgerrln("Col is outside of matrix!");
+	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
+	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
 	return &mat->data[mat->c * row + col];
 }
 
 MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
-	if(row > mat->r) dbgerrln("Row is outside of matrix!");
-	if(col > mat->c) dbgerrln("Col is outside of matrix!");
+	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
+	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
 	return mat->data[mat->c * row + col];
 }
 
@@ -149,10 +149,10 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 	for (int row = 0; row < a->r; row ++) {
 		for (int col = 0; col < b->c; col ++) {
 			MATRIX_TYPE sum = 0;
-			for(int c = 0; c < b->c; c ++){
+			for(int c = 0; c < a->c; c ++){
 				sum += matrix_atv(a, row, c)*matrix_atv(b, c, col);
 			}
-			printf("%f\n", sum);
+			//printf("%f\n", sum);
 			*matrix_at(out, row, col) = sum;
 		}
 	}
@@ -275,6 +275,7 @@ matrix_rtn matrix_divide_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE sca
 
 	for(int i = 0; i < mat->r*mat->c; i ++){
 		out->data[i] = mat->data[i]/scalar;
+		//printf("%f\n", out->data[i]);
 	}
 	return MATRIX_OK;
 }
@@ -366,9 +367,10 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b,
 	for (int row = 0; row < a->r; row ++) {
 		for (int col = 0; col < cols; col ++) {
 			MATRIX_TYPE sum = 0;
-			for(int c = 0; c < cols; c ++){
-				//printf("index: %d\n", c*rows+col);
-				sum += matrix_atv(a, row, c)*b[c*rows+col];
+			for(int c = 0; c < a->c; c ++){
+				//printf("index: %d\n", c*cols+col);
+				//printf("val: %d\n", b[c*cols+col]);
+				sum += matrix_atv(a, row, c)*b[c*cols+col];
 			}
 			//printf("%dx%d: %f\n", row, col, sum);
 			//printf("val: %f\n", *matrix_at(out, row, col));

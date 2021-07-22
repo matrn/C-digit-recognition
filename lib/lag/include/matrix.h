@@ -46,6 +46,9 @@ void matrix_print(const matrix_t* mat);
 void matrix_print_wh(const matrix_t* mat, bool header);  // with header
 
 
+MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
+MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);	
+
 matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b);
 matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b);
 matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b);
