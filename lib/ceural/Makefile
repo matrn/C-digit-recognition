@@ -1,4 +1,4 @@
-CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG
+CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG #-O2 -fomit-frame-pointer
 LDFLAGS+=-lm
 
 

@@ -181,8 +181,12 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
 		matrix_divide_rscalar(delta, &layer->delta_sum, batch_size);
 		matrix_divide_rscalar(grad, &layer->grad_sum, batch_size);
 
+		//matrix_print_wh(delta, true);
+		//matrix_print_wh(grad, true);
+
 		matrix_scale(delta, delta, learning_rate);
 		matrix_scale(grad, grad, learning_rate);
+
 
 		matrix_sub(&layer->weights, &layer->weights, grad);
 		matrix_sub(&layer->bias, &layer->bias, delta);
@@ -198,21 +202,50 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 	for(int epoch = 0; epoch < epochs; epoch ++){
 		printf("Epoch #%d\n", epoch +1);
 
-		//int set_len = train_set->images->length;
-		int set_len = 100;
+		int set_len = train_set->images->length;
+		set_len = 5000;
 		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
+			ceural_net_reset_sums(nn);
 			if(batch_fin > set_len) batch_fin = set_len;
 
+			int batch_count = 0;
 			for(; i < batch_fin; i ++){
 				printf("i: %d\n", i);
 				ceural_net_backpropagate(nn, train_set->images->data[i], train_set->labels->data[i]);
+				batch_count ++;
 			}
-			ceural_net_update_weigts(nn, 0.001, batch_size);
+			ceural_net_update_weigts(nn, 0.001, batch_count);
 		}
 	}
+
+	/*
+	for(int i = 0; i < nn->size; i ++){
+		ceural_layer_t * layer = &nn->layers[i];
+		matrix_print_wh(&layer->weights, true);
+	}
+	*/
 }
 
 void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
+	int correct = 0;
+	int wrong = 0;
+	printf("Running test set with length %d\n", test_set->images->length);
 
+	int set_len = test_set->images->length;
+	matrix_t * output = matrix_new();
+	for(int i = 0; i < set_len; i ++){
+		ceural_net_forward(nn, output, test_set->images->data[i]);
+		mnist_label_t predicted = matrix_argmax(output);
+		mnist_label_t expected = test_set->labels->data[i];
+
+		if(predicted == expected) correct += 1;
+		else wrong += 1;
+
+		//printf("%d vs %d\n", predicted, expected);
+	}
+	printf("Correct: %d, Wrong: %d\n", correct, wrong);
+	printf("Accuracy: %f\n %%\n", ((double)correct/set_len)*100.0);
+
+	matrix_delete(output);
 }

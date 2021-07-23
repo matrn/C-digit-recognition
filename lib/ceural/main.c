@@ -30,9 +30,15 @@ int main(){
 	mnist_labels_t train_labels;
 	mnist_images_t train_images;
 
+	mnist_labels_t test_labels;
+	mnist_images_t test_images;
+
 	mnist_labels_load(&train_labels, "../../data/train-labels-idx1-ubyte");
-	printf("rtn: %d\n", mnist_images_load(&train_images, "../../data/train-images-idx3-ubyte"));
+	mnist_images_load(&train_images, "../../data/train-images-idx3-ubyte");
 	
+	mnist_labels_load(&test_labels, "../../data/t10k-labels-idx1-ubyte");
+	mnist_images_load(&test_images, "../../data/t10k-images-idx3-ubyte");
+
 	// printf("size: %ld\n", sizeof(train_images.data[0][1]));
 	// printf("data0: %d\n", train_images.data[0][0]);
 
@@ -42,6 +48,14 @@ int main(){
 		.images = &train_images,
 		.labels = &train_labels
 	};
+
+	mnist_set_t test_set = {
+		.images = &test_images,
+		.labels = &test_labels
+	};
+
+	ceural_net_test(&nn, &test_set);
+	
 	//ceural_net_backpropagate(&nn, train_images.data[0], train_labels.data[0]);
 	ceural_net_train(&nn, &train_set, 1, 32);
 
@@ -53,9 +67,14 @@ int main(){
 	printf("\n");
 	matrix_delete(out);
 
-	
+	ceural_net_test(&nn, &test_set);
+
+
 	mnist_labels_free(&train_labels);
 	mnist_images_free(&train_images);
+
+	mnist_labels_free(&test_labels);
+	mnist_images_free(&test_images);
 
 	ceural_net_free(&nn);
 	return 0;

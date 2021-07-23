@@ -22,10 +22,10 @@ mnist_rtn mnist_labels_load(mnist_labels_t * labels, char * filename){
 	if(f){
 		int8_t buf[4];
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if(MSB_4bytes_to_int(buf) != 2049) return MNIST_PARSE_ERROR;   // magic
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if((items_num = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
 
 		labels->length = items_num;
@@ -63,16 +63,16 @@ mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 	if(f){
 		int8_t buf[4];
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if(MSB_4bytes_to_int(buf) != 2051) return MNIST_PARSE_ERROR;   // magic
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if((items_num = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if((rows = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
 
-		fread(&buf, 4, 1, f);
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
 		if((cols = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
 
 
