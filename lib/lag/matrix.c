@@ -415,36 +415,6 @@ matrix_size_t matrix_get_cols(matrix_t * mat){
 
 
 
-/*
-void matrix_transpose(matrix_t * dst, matrix_t * src){
-	if(src->r == 1 || src->c == 1){
-		if(dst == src){
-			//dbgln("Dst == src");
-		}
-		else{
-			matrix_copy(dst, src);
-		}
-		matrix_size_t tmp = dst->r;
-		dst->r = dst->c;
-		dst->c = tmp;
-		return;
-	}
-	matrix_copy(dst, src);
-	matrix_size_t tmp = dst->r;
-		dst->r = dst->c;
-		dst->c = tmp;
-
-	for (int i = 0; i < dst->r; ++i) {
-		for (int j = i; j < dst->c; ++j) {
-			MATRIX_TYPE temp = matrix_atv(dst, i, j);
-			*matrix_at(dst, i, j) = matrix_atv(dst, j, i);
-			*matrix_at(dst, j, i) = temp;
-		}
-	}
-}
-*/
-
-
 void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsigned h, const unsigned w){
 	if(src->r == 1 || src->c == 1){
 		if(dst == src){

@@ -214,7 +214,7 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 		printf("Epoch #%d\n", epoch +1);
 
 		int set_len = train_set->images->length;
-		set_len = 5000;
+		//set_len = 5000;
 		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
 			ceural_net_reset_sums(nn);
@@ -229,13 +229,6 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 			ceural_net_update_weigts(nn, 0.001, batch_count);
 		}
 	}
-
-	/*
-	for(int i = 0; i < nn->size; i ++){
-		ceural_layer_t * layer = &nn->layers[i];
-		matrix_print_wh(&layer->weights, true);
-	}
-	*/
 }
 
 void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
