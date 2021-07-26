@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "../../lag/include/lag.h"
+#include "../../lag/include/debug.h"
 #include "mnist.h"
 
 enum ceural_activation { ACTIVATION_RELU,

@@ -54,12 +54,19 @@ int main(){
 		.labels = &test_labels
 	};
 
+	matrix_t * out = matrix_new(); //calloc(10, sizeof(double));
+
+	cstart(forward_phase);
+	ceural_net_forward(&nn, out, train_images.data[0]);
+	cstop(forward_phase);
+
+
 	ceural_net_test(&nn, &test_set);
-	
+
 	//ceural_net_backpropagate(&nn, train_images.data[0], train_labels.data[0]);
 	ceural_net_train(&nn, &train_set, 1, 32);
 
-	matrix_t * out = matrix_new(); //calloc(10, sizeof(double));
+	
 	ceural_net_forward(&nn, out, train_images.data[0]);
 	for(int i = 0; i < 10; i ++) printf("%-8d", i);
 	printf("\n");

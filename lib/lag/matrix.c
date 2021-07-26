@@ -1,6 +1,8 @@
 #include "include/matrix.h"
 
 
+
+
 matrix_t * matrix_new(){
 	matrix_t * new_mat = malloc(sizeof(matrix_t));
 	new_mat->data = NULL;
@@ -69,13 +71,13 @@ void matrix_zero(matrix_t* mat) {
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
 	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
 	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
-	return &mat->data[mat->c * row + col];
+	return &mat->data[row*mat->c + col];
 }
 
 MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
 	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
 	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
-	return mat->data[mat->c * row + col];
+	return mat->data[row*mat->c + col];
 }
 
 
@@ -94,7 +96,7 @@ void matrix_print_wh(const matrix_t* mat, bool header) {
 
 	for (int r = 0; r < mat->r; r++) {
 		for (int c = 0; c < mat->c; c++) {
-			printf("%8.2f", mat->data[r*mat->c + c]);
+			printf("%8.3f", mat->data[r*mat->c + c]);
 			if (c + 1 < mat->c) printf(" ");
 		}
 		printf("\n");
@@ -166,8 +168,8 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 	for (int row = 0; row < a->r; row ++) {
 		for (int col = 0; col < b->c; col ++) {
 			MATRIX_TYPE sum = 0;
-			for(int c = 0; c < a->c; c ++){
-				sum += matrix_atv(a, row, c)*matrix_atv(b, c, col);
+			for(int r = 0; r < b->r; r ++){
+				sum += matrix_atv(a, row, r)*matrix_atv(b, r, col);
 			}
 			//printf("%f\n", sum);
 			*matrix_at(out, row, col) = sum;
@@ -377,17 +379,20 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b,
 
 	//matrix_print_wh(out, true);
 	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
+	cstart(matrix_resize);
 	matrix_resize(out, a->r, cols);
+	cstop(matrix_resize);
 	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
 	
 
 	for (int row = 0; row < a->r; row ++) {
 		for (int col = 0; col < cols; col ++) {
 			MATRIX_TYPE sum = 0;
-			for(int c = 0; c < a->c; c ++){
+			for(int r = 0; r < rows; r ++){
 				//printf("index: %d\n", c*cols+col);
 				//printf("val: %d\n", b[c*cols+col]);
-				sum += matrix_atv(a, row, c)*b[c*cols+col];
+				if(b[r*cols+col] == 0) continue;
+				sum += matrix_atv(a, row, r)*b[r*cols+col];
 			}
 			//printf("%dx%d: %f\n", row, col, sum);
 			//printf("val: %f\n", *matrix_at(out, row, col));
@@ -410,7 +415,7 @@ matrix_size_t matrix_get_cols(matrix_t * mat){
 
 
 
-
+/*
 void matrix_transpose(matrix_t * dst, matrix_t * src){
 	if(src->r == 1 || src->c == 1){
 		if(dst == src){
@@ -434,6 +439,48 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){
 			MATRIX_TYPE temp = matrix_atv(dst, i, j);
 			*matrix_at(dst, i, j) = matrix_atv(dst, j, i);
 			*matrix_at(dst, j, i) = temp;
+		}
+	}
+}
+*/
+
+
+void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsigned h, const unsigned w){
+	if(src->r == 1 || src->c == 1){
+		if(dst == src){
+			//dbgln("Dst == src");
+		}
+		else{
+			matrix_copy(dst, src);
+		}
+		matrix_size_t tmp = dst->r;
+		dst->r = dst->c;
+		dst->c = tmp;
+		return;
+	}
+
+	matrix_copy(dst, src);
+	matrix_size_t tmp = dst->r;
+	dst->r = dst->c;
+	dst->c = tmp;
+
+	// from: https://softwareengineering.stackexchange.com/a/271722/327700
+	for (unsigned start = 0; start <= src->c * src->r - 1; ++start){
+		unsigned next = start;
+		unsigned i = 0;
+		do{
+			++i;
+			next = (next % src->r) * src->c + next / src->r;
+		} while (next > start);
+
+		if (next >= start && i != 1){
+			const double tmp = dst->data[start];
+			next = start;
+			do{
+				i = (next % src->r) * src->c + next / src->r;
+				dst->data[next] = (i == start) ? tmp : dst->data[i];
+				next = i;
+			} while (next > start);
 		}
 	}
 }

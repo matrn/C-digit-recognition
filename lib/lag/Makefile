@@ -6,7 +6,7 @@ lag.o: matrix.c
 	${CC} ${CFLAGS} -o ../../obj/$@ -c $^ ${LDFLAGS}
 
 
-matrix: matrix_test.c matrix.c
+matrix: matrix_test.c matrix.c debug.c
 	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 

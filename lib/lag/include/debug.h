@@ -15,4 +15,26 @@
 	#define dbgerrln(str)
 #endif
 
+
+
+//#define TM_DEBUG
+
+#include <stdio.h>
+#include <time.h>
+typedef clock_t dbg_tm;
+
+dbg_tm get_dbg_tm();
+void c_dbg_stop(dbg_tm begin, const int line_start, const int line_stop, const char * var_name, const char * fname);
+
+
+#ifdef TM_DEBUG
+	#define cstart(name) \
+		const int dln_##name = __LINE__;\
+		dbg_tm dtm_##name = get_dbg_tm() // cstart()      // ## means concatenation
+	#define cstop(name) c_dbg_stop(dtm_##name, dln_##name, __LINE__ , #name, __func__)
+#else
+	#define cstart(name)
+	#define cstop(name)
+#endif
+
 #endif

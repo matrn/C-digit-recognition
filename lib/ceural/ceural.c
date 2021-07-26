@@ -5,8 +5,7 @@ void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 	nn->size = nn_def->layers;
 	nn->layers = (ceural_layer_t *)malloc(nn->size*sizeof(ceural_layer_t));
 
-	random_seed(123);
-
+	random_seed(1234);
 
 	for(int i = 0; i < nn_def->layers; i ++){
 		ceural_layer_definition_t * layer = &nn_def->layout[i];
@@ -65,20 +64,32 @@ void ceural_net_forward(ceural_net_t * nn, matrix_t * output, mnist_pixel_t * in
 	// }
 
 	//matrix_t * sum = matrix_new();
+	cstart(multiply_r1ubyte);
 	matrix_multiply_r1ubyteMat(&input_layer->sum, &input_layer->weights, input, matrix_get_cols(&input_layer->weights), 1);    // input_dim, 1
-	//matrix_print_wh(&input_layer->sum, true);
-	matrix_add(&input_layer->sum, &input_layer->sum, &input_layer->bias);
-	input_layer->activation_function(&input_layer->output, &input_layer->sum);
+	cstop(multiply_r1ubyte);
 
+	//matrix_print_wh(&input_layer->sum, true);
+	cstart(mat_add);
+	matrix_add(&input_layer->sum, &input_layer->sum, &input_layer->bias);
+	cstop(mat_add);
+
+	cstart(activation);
+	input_layer->activation_function(&input_layer->output, &input_layer->sum);
+	cstop(activation);
+	
+	cstart(for_loop);
 	for(int i = 1; i < nn->size; i ++){
 		ceural_layer_t * layer = &nn->layers[i];
 		matrix_multiply(&layer->sum, &layer->weights, &nn->layers[i-1].output);
 		matrix_add(&layer->sum, &layer->sum, &layer->bias);
 		layer->activation_function(&layer->output, &layer->sum);
 	}
+	cstop(for_loop);
 
+	cstart(matrix_copy);
 	matrix_t * output_mat = &nn->layers[nn->size-1].output;
 	matrix_copy(output, output_mat);
+	cstop(matrix_copy);
 	// for(int i = 0; i < matrix_get_rows(output_mat); i ++){
 	// 	output[i] = matrix_atv(output_mat, i, 0);
 	// }
@@ -119,6 +130,7 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 	matrix_multiply(output_grad, output_delta, &nn->layers[nn->size-2].output);
 	matrix_add(&output_layer->grad_sum, &output_layer->grad_sum, output_grad);
 	
+	matrix_t * delta = matrix_new();
 	matrix_t * right_layer_delta = output_delta;
 	for(int i = nn->size-2; i >= 0; i --){
 		printf("index: %d\n", i);
@@ -137,7 +149,6 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 
 		layer->activation_function_derivative(activation_d, &layer->sum);
 
-		matrix_t * delta = matrix_new();
 		matrix_multiply_ew(delta, error, activation_d);
 		right_layer_delta = delta;
 
@@ -157,17 +168,17 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 
 		matrix_delete(error);
 		//matrix_delete(activation_d);
-		matrix_delete(delta);
+		
 		matrix_delete(grad);
 	}
 
+	matrix_delete(delta);
 	matrix_delete(output);
 	matrix_delete(expected_output);
 	matrix_delete(output_error);
 	matrix_delete(output_delta);
 	matrix_delete(output_grad);
-	matrix_delete(activation_d);
-	
+	matrix_delete(activation_d);	
 }
 
 

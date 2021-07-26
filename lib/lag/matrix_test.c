@@ -18,8 +18,22 @@ int main(){
 	
 	matrix_multiply(&out, &mat, &mat);
 	matrix_print_wh(&out, true);
+	
+	puts("------------------------------------------");
 
-	matrix_free(&mat);
+	matrix_resize(&mat, 3, 2);
+	MATRIX_TYPE data[] = {
+		1, 2,
+		3, 4,
+		5, 6
+	};
+	free(mat.data);
+	mat.data = &data[0];
+	matrix_print_wh(&mat, true);
+	matrix_transpose(&out, &mat);
+	matrix_print_wh(&out, true);
+
+	//matrix_free(&mat);
 	matrix_free(&out);
 
 	return 0;
