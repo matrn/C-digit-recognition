@@ -1,6 +1,7 @@
 from numpy.lib.function_base import _gradient_dispatcher, percentile
 from utils import load_mnist_images, load_mnist_labels, show_image
 import numpy as np
+from timeit import default_timer as timer
 
 
 train_filename = ('../data/train-images-idx3-ubyte',
@@ -171,7 +172,7 @@ class NN:
 				wrong += 1
 		
 		print(f'Correct {correct}, wrong: {wrong}')
-		print(f'Accuracy {correct/10000.} %')
+		print(f'Accuracy {(correct/10000.)*100} %')
 
 
 if __name__ == '__main__':
@@ -180,12 +181,18 @@ if __name__ == '__main__':
 	nn.load_test_data()
 	nn.init_network(nn_layout)
 
+	start = timer()
+	nn.forward(nn.train_data[0, :, :].ravel())
+	end = timer()
+	print("Forward phase time: ", (end - start)*1000*1000, "us")
+
+
 	nn.test()
 	print("-------")	
 	nn.train()
 	nn.test()
 
-
+	
 	print(nn.forward(nn.train_data[0, :, :].ravel()))
 	print(nn.forward(nn.train_data[1, :, :].ravel()))
 
