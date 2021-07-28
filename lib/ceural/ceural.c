@@ -133,7 +133,7 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 	matrix_t * delta = matrix_new();
 	matrix_t * right_layer_delta = output_delta;
 	for(int i = nn->size-2; i >= 0; i --){
-		printf("index: %d\n", i);
+		//printf("index: %d\n", i);
 
 		ceural_layer_t * layer = &nn->layers[i];
 		matrix_t * right_layer_weights = &nn->layers[i+1].weights;
@@ -214,7 +214,8 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 		printf("Epoch #%d\n", epoch +1);
 
 		int set_len = train_set->images->length;
-		//set_len = 5000;
+		set_len = 5000;
+		puts("");
 		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
 			ceural_net_reset_sums(nn);
@@ -222,11 +223,14 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 
 			int batch_count = 0;
 			for(; i < batch_fin; i ++){
-				printf("i: %d\n", i);
+				//printf("i: %d\n", i);
+
 				ceural_net_backpropagate(nn, train_set->images->data[i], train_set->labels->data[i]);
 				batch_count ++;
 			}
 			ceural_net_update_weigts(nn, 0.001, batch_count);
+			printf("\ri: %6d", i);
+			fflush(stdout);
 		}
 	}
 }

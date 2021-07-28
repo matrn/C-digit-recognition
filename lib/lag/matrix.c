@@ -454,3 +454,131 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsig
 		}
 	}
 }
+
+ void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols){
+	matrix_size_t top_rows = 0;
+	for(int row = 0; row < rows; row ++){
+		for(int col = 0; col < cols; col ++){
+			if(mat[row*cols+col] != 0){
+				top_rows = row;
+				row = rows;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t bottom_rows = 0;
+	for(int row = rows-1; row >= 0; row --){
+		for(int col = 0; col < cols; col ++){
+			if(mat[row*cols+col] != 0){
+				bottom_rows = row;
+				row = -1;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t left_cols = 0;
+	for(int col = 0; col < cols; col ++){
+		for(int row = top_rows; row <= bottom_rows; row ++){
+			if(mat[row*cols+col] != 0){
+				left_cols = col;
+				col = cols;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t right_cols = 0;
+	for(int col = cols-1; col >= 0; col --){
+		for(int row = top_rows; row <= bottom_rows; row ++){
+			if(mat[row*cols+col] != 0){
+				right_cols = col;
+				col = -1;
+				break;
+			}
+		}
+	}
+	
+	*width_start = left_cols;
+	*width_stop = right_cols;
+
+	*height_start = top_rows;
+	*height_stop = bottom_rows;
+}
+
+
+uint8_t * matrix_1ubyteMat_crop_edges(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols){
+	uint8_t * out = NULL;
+	/*puts("HERE");
+	if(out == NULL) puts("null before malloc");
+	out = (uint8_t *)malloc(100);
+	if(out == NULL) puts("null after malloc");
+	out[0] = 69;
+	puts("ALLOC done");
+	*out_rows = 1;
+	*out_cols = 1;
+	return out;
+	*/
+
+	matrix_size_t top_rows = 0;
+	for(int row = 0; row < rows; row ++){
+		for(int col = 0; col < cols; col ++){
+			if(mat[row*cols+col] != 0){
+				top_rows = row;
+				row = rows;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t bottom_rows = 0;
+	for(int row = rows-1; row >= 0; row --){
+		for(int col = 0; col < cols; col ++){
+			if(mat[row*cols+col] != 0){
+				bottom_rows = row;
+				row = -1;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t left_cols = 0;
+	for(int col = 0; col < cols; col ++){
+		for(int row = top_rows; row <= bottom_rows; row ++){
+			if(mat[row*cols+col] != 0){
+				left_cols = col;
+				col = cols;
+				break;
+			}
+		}
+	}
+
+	matrix_size_t right_cols = 0;
+	for(int col = cols-1; col >= 0; col --){
+		for(int row = top_rows; row <= bottom_rows; row ++){
+			if(mat[row*cols+col] != 0){
+				right_cols = col;
+				col = -1;
+				break;
+			}
+		}
+	}
+	printf("top: %d, bottom: %d\n", top_rows, bottom_rows);
+	printf("left: %d, right: %d\n", left_cols, right_cols);
+
+	*out_rows = bottom_rows-top_rows+1;
+	*out_cols = right_cols-left_cols+1;
+	printf("size: %ld\n", (*out_rows)*(*out_cols)*sizeof(uint8_t));
+	puts("HERE");
+	out = (uint8_t *)malloc((*out_rows)*(*out_cols)*sizeof(uint8_t));
+	for(int row = top_rows; row <= bottom_rows; row ++){
+		for(int col = left_cols; col <= right_cols; col ++){
+			printf("i: %d\n", (row-top_rows)*(*out_cols)+(col-left_cols));
+			out[(row-top_rows)*(*out_cols)+(col-left_cols)] = mat[row*cols+col];
+		}
+	}
+
+
+	return out;
+}

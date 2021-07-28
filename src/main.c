@@ -135,33 +135,37 @@ static void print_hello(GtkWidget *widget, gpointer data) {
 
 		//printf("%d %d %d-%d|", r, g, b, a); 
 		if(gray != 0){			
-			printf("%d: %d ", count, gray);
+			//printf("%d: %d ", count, gray);
 			count ++;
 		}
 
 		img[index++] = gray;
 	}
-	int crop_rows = 0;
-	int crop_cols = 0;
-	byte * cropped = NULL;
-	puts("CROP");
-	cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
-	printf("Cropped size: %dx%d\n", crop_rows, crop_cols);
-	printf("at 0: %d\n", cropped[0]);
-	if(cropped == NULL) puts("NULLL");
-	puts("ENDCROP");
-	
+	int crop_x, crop_y, crop_x2, crop_y2;
+	//cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
+	matrix_1ubyteMat_calculate_crop(&crop_x, &crop_x2, &crop_y, &crop_y2, img, height, width);
+	int crop_w = crop_x2-crop_x+1;
+	int crop_h = crop_y2-crop_y+1;
+	printf("Cropped size: %dx%d\n", crop_w, crop_h);
+	//printf("at 0: %d\n", cropped[0]);
+	//if(cropped == NULL) puts("NULLL");
+	//puts("ENDCROP");
+	/*
 	for(int row = 0; row < crop_rows; row ++){
 		for(int col = 0; col < crop_cols; col ++){
 			printf("%4d ", cropped[row*crop_cols+col]);
 		}
 		printf("\n");
-	}
-	GdkPixbuf * subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_data, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)));
+	}*/
+	GBytes * img_bytes = g_bytes_new(img_data, width*height*4);
+	//GBytes * img_bytes = g_bytes_new_from_bytes(img_data, 0, width*height*4);
+	GdkPixbuf * subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)), crop_x, crop_y, crop_w, crop_h);
 	//GdkPixbuf * pixbuf = gdk_pixbuf_new_from_bytes(cropped, GDK_COLORSPACE_RGB, false, 8, crop_cols, crop_rows, crop_cols*3);
-	GdkPixbuf * pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 10, 10, GDK_INTERP_BILINEAR);
+	GdkPixbuf * pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 100, 100, GDK_INTERP_BILINEAR);
+	open_image(pixbuf);
+	
 	free(img);
-	free(cropped);
+	//free(cropped);
 
 
 	puts("");
@@ -210,6 +214,14 @@ static void print_hello(GtkWidget *widget, gpointer data) {
 	*/
 }
 
+static GtkWidget *image;
+
+void open_image (GdkPixbuf * data){
+	GdkPixbuf * pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
+	gtk_image_set_from_pixbuf(image, pixbuf);
+}
+
+
 static void activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *window;
 	GtkWidget *frame;
@@ -257,6 +269,29 @@ static void activate(GtkApplication *app, gpointer user_data) {
     */
 	gtk_widget_set_events(drawing_area, gtk_widget_get_events(drawing_area) | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
 	gtk_widget_show_all(window);
+
+
+
+
+	
+	GtkWidget *box;
+
+	/* Set up the UI */
+	window =gtk_application_window_new (app);
+	gtk_window_set_title (GTK_WINDOW (window), "Cropped");
+
+	box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 5);
+	image = gtk_image_new ();
+
+	gtk_box_pack_start (GTK_BOX (box), image, TRUE, TRUE, 0);
+
+	gtk_container_add (GTK_CONTAINER (window), box);
+	gtk_widget_set_size_request(box, 200, 200);
+
+	/* Exit when the window is closed */
+	g_signal_connect (window, "destroy", G_CALLBACK (gtk_main_quit), NULL);
+	gtk_widget_show_all(window);
+
 }
 
 int main(int argc, char **argv) {
