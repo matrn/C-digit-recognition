@@ -11,6 +11,15 @@ static cairo_surface_t *surface = NULL;
 static int surface_width = -1;
 static int surface_height = -1;
 
+
+static GtkWidget *image;
+
+void open_image (GdkPixbuf * data){
+	GdkPixbuf * pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
+	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
+}
+
+
 static void clear_surface(void) {
 	cairo_t *cr;
 	cr = cairo_create(surface);
@@ -214,12 +223,7 @@ static void print_hello(GtkWidget *widget, gpointer data) {
 	*/
 }
 
-static GtkWidget *image;
 
-void open_image (GdkPixbuf * data){
-	GdkPixbuf * pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
-	gtk_image_set_from_pixbuf(image, pixbuf);
-}
 
 
 static void activate(GtkApplication *app, gpointer user_data) {
