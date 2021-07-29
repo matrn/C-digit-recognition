@@ -35,7 +35,7 @@ void matrix_delete(matrix_t * mat){
 	free(mat);
 }
 
-void matrix_copy(matrix_t * dst, matrix_t * src){
+void matrix_copy(matrix_t * dst, const matrix_t * src){
 	if(dst == src){
 		//dbgln("Destination is same as the source, not copying");
 		return;
@@ -242,7 +242,7 @@ matrix_size_t matrix_argmin(matrix_t * mat){
 
 
 
-matrix_rtn matrix_maximum(matrix_t * out, matrix_t * mat, MATRIX_TYPE value){
+matrix_rtn matrix_maximum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value){
 	matrix_resize(out, mat->r, mat->c);
 
 	for(int i = 0; i < mat->r*mat->c; i ++){
@@ -252,7 +252,7 @@ matrix_rtn matrix_maximum(matrix_t * out, matrix_t * mat, MATRIX_TYPE value){
 }
 
 
-matrix_rtn matrix_minimum(matrix_t * out, matrix_t * mat, MATRIX_TYPE value){
+matrix_rtn matrix_minimum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value){
 	matrix_resize(out, mat->r, mat->c);
 
 	for(int i = 0; i < mat->r*mat->c; i ++){
@@ -311,7 +311,7 @@ matrix_rtn matrix_exp_ew(matrix_t * out, matrix_t* mat){
 }
 
 
-matrix_rtn matrix_scale(matrix_t *out, matrix_t * mat, MATRIX_TYPE scalar){
+matrix_rtn matrix_scale(matrix_t *out, const matrix_t * mat, const MATRIX_TYPE scalar){
 	matrix_resize(out, mat->r, mat->c);
 
 	for(int i = 0; i < mat->r*mat->c; i ++){

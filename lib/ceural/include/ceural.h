@@ -29,8 +29,8 @@ typedef struct CeuralNetworkDefinition {
 typedef struct CeuralLayer {
 	matrix_t weights;
 	matrix_t bias;
-	void (*activation_function)(matrix_t *, matrix_t *);
-	void (*activation_function_derivative)(matrix_t *, matrix_t *);
+	void (*activation_function)(matrix_t *, const matrix_t *);
+	void (*activation_function_derivative)(matrix_t *, const matrix_t *);
 	
 	// memory:
 	matrix_t sum;
@@ -48,10 +48,10 @@ typedef struct Ceuralnet {
 } ceural_net_t;
 
 
-void ceural_relu(matrix_t * out, matrix_t * z);
-void ceural_relu_derivative(matrix_t * out, matrix_t * z);
-void ceural_sigmoid(matrix_t * out, matrix_t * z);
-void ceural_sigmoid_derivative(matrix_t * out, matrix_t * z);
+void ceural_relu(matrix_t * out, const matrix_t * z);
+void ceural_relu_derivative(matrix_t * out, const matrix_t * z);
+void ceural_sigmoid(matrix_t * out, const matrix_t * z);
+void ceural_sigmoid_derivative(matrix_t * out, const matrix_t * z);
 
 
 
@@ -64,4 +64,6 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
 void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size);
 void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set);
 
+void ceural_net_save_to_file(ceural_net_t * nn, const char * filename);
+void ceural_net_load_from_file(ceural_net_t * nn, const char * filename);
 #endif

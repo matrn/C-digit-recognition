@@ -229,7 +229,7 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 				batch_count ++;
 			}
 			ceural_net_update_weigts(nn, 0.001, batch_count);
-			printf("\ri: %6d", i);
+			printf("\ri: %6d. ", i);
 			fflush(stdout);
 		}
 	}

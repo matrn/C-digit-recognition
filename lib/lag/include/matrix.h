@@ -37,7 +37,7 @@ void matrix_init(matrix_t *mat);
 void matrix_alloc(matrix_t* mat, matrix_size_t rows, matrix_size_t cols);
 void matrix_free(matrix_t* mat);
 void matrix_delete(matrix_t * mat);
-void matrix_copy(matrix_t * dst, matrix_t * src);
+void matrix_copy(matrix_t * dst, const matrix_t * src);
 void matrix_resize(matrix_t * mat, matrix_size_t rows, matrix_size_t cols);
 void matrix_zero(matrix_t * mat);
 
@@ -63,8 +63,8 @@ MATRIX_TYPE matrix_min(matrix_t * mat);
 matrix_size_t matrix_argmin(matrix_t * mat);
 
 
-matrix_rtn matrix_maximum(matrix_t * out, matrix_t * mat, MATRIX_TYPE value);   // create `out` matrix with max values from `mat` against `value`
-matrix_rtn matrix_minimum(matrix_t * out, matrix_t * mat, MATRIX_TYPE value);   // create `out` matrix with min values from `mat` against `value`
+matrix_rtn matrix_maximum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value);   // create `out` matrix with max values from `mat` against `value`
+matrix_rtn matrix_minimum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value);   // create `out` matrix with min values from `mat` against `value`
 
 
 matrix_rtn matrix_divide_ew(matrix_t * out, matrix_t* a, matrix_t* b);
@@ -74,7 +74,7 @@ matrix_rtn matrix_divide_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE sca
 matrix_rtn matrix_exp_ew(matrix_t * out, matrix_t* mat);
 
 
-matrix_rtn matrix_scale(matrix_t *out, matrix_t * mat, MATRIX_TYPE scalar);
+matrix_rtn matrix_scale(matrix_t *out, const matrix_t * mat, const MATRIX_TYPE scalar);
 
 matrix_rtn matrix_add_scalar(matrix_t * out, const matrix_t * mat, MATRIX_TYPE scalar);
 matrix_rtn matrix_sub_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * mat);

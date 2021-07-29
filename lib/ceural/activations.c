@@ -1,7 +1,7 @@
 #include "include/ceural.h"
 
 
-void ceural_relu(matrix_t * out, matrix_t * z){
+void ceural_relu(matrix_t * out, const matrix_t * z){
 	//matrix_t * out = matrix_new();
 	//matrix_alloc(out, z->r, z->c);
 
@@ -10,7 +10,7 @@ void ceural_relu(matrix_t * out, matrix_t * z){
 	//return out;
 }
 
-void ceural_relu_derivative(matrix_t * out, matrix_t * z){
+void ceural_relu_derivative(matrix_t * out, const matrix_t * z){
 	//matrix_t * out = matrix_new();
 	//out->data = NULL;
 	matrix_copy(out, z);
@@ -22,7 +22,7 @@ void ceural_relu_derivative(matrix_t * out, matrix_t * z){
 	//return out;
 }
 
-void ceural_sigmoid(matrix_t * out, matrix_t * z){
+void ceural_sigmoid(matrix_t * out, const matrix_t * z){
 	// 1/(1+exp(-z))
 
 	//matrix_t * out = matrix_new();
@@ -39,7 +39,7 @@ void ceural_sigmoid(matrix_t * out, matrix_t * z){
 }
 
 
-void ceural_sigmoid_derivative(matrix_t * out, matrix_t * z){
+void ceural_sigmoid_derivative(matrix_t * out, const matrix_t * z){
 	matrix_t * z_sigmoid = matrix_new();
 	ceural_sigmoid(z_sigmoid, z);
 	//matrix_t * out = matrix_new();
