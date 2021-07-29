@@ -236,7 +236,7 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 	}
 }
 
-void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
+double ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 	int correct = 0;
 	int wrong = 0;
 	printf("Running test set with length %d\n", test_set->images->length);
@@ -253,15 +253,18 @@ void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 
 		//printf("%d vs %d\n", predicted, expected);
 	}
+	double accuracy = ((double)correct/set_len)*100.0;
 	printf("Correct: %d, Wrong: %d\n", correct, wrong);
-	printf("Accuracy: %f %%\n", ((double)correct/set_len)*100.0);
+	printf("Accuracy: %f %%\n", accuracy);
 
 	matrix_delete(output);
+
+	return accuracy;
 }
 
 
 
-ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
+ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, double train_accuracy){
 	/*
 	#header #1
 		uint16_t, MSB - magic number - 420
@@ -272,7 +275,7 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
 		int8_t - activation function
 	#header #2
 		int8_t - sizeof(double)
-		uint16_t, MSB - train accuracy (in %) * 100
+		int16_t, MSB - train accuracy (in %) * 100
 			
 	#layers - matrices:
 		## weights:
@@ -285,10 +288,10 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
 			double, MSB - data
 	
 	#check:
-		double, MSB - PI number +- 0.0001
+		double, MSB - euler's number +- 0.0001
 	*/
 	FILE *f;
-	int8_t buf[8];
+	int8_t buf[DOUBLE_SIZE > 4 ? DOUBLE_SIZE : 4];
 
 
 	f = fopen(filename, "w");
@@ -310,17 +313,64 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
 		ceural_layer_t * layer = &nn->layers[i];
 
 		// input dim
-		int16_to_MSB_2bytes(buf, matrix_get_cols(&layer->weights));
+		int16_to_MSB_2bytes(buf, (int16_t)matrix_get_cols(&layer->weights));
 		fwrite(buf, 2, 1, f);
 
 		// output dim
-		int16_to_MSB_2bytes(buf, matrix_get_rows(&layer->weights));
+		int16_to_MSB_2bytes(buf, (int16_t)matrix_get_rows(&layer->weights));
 		fwrite(buf, 2, 1, f);
 
 		// activation function
 		int8_t activ_buf = (int8_t)layer->activation_function_enum;
 		fwrite(&activ_buf, 1, 1, f);
 	}
+
+	// sizeof(deouble)
+	int8_t double_size = sizeof(MATRIX_TYPE);
+	fwrite(&double_size, 1, 1, f);
+
+
+	// train accuracy
+	int16_to_MSB_2bytes(buf, train_accuracy*100+0.5);
+	fwrite(buf, 2, 1, f);
+
+	// weights & biases
+	for(int i = 0; i < nn->size; i ++){
+		ceural_layer_t * layer = &nn->layers[i];
+
+		/* weights */
+		// rows
+		int32_to_MSB_4bytes(buf, matrix_get_rows(&layer->weights));
+		fwrite(buf, 4, 1, f);
+
+		// cols
+		int32_to_MSB_4bytes(buf, matrix_get_cols(&layer->weights));
+		fwrite(buf, 4, 1, f);
+
+		// data
+		for(int i = 0; i < layer->weights.r*layer->weights.c; i ++){
+			double_to_MSB_bytes(buf, layer->weights.data[i]);
+			fwrite(buf, DOUBLE_SIZE, 1, f);
+		}
+
+		/* bias */
+		// rows
+		int32_to_MSB_4bytes(buf, matrix_get_rows(&layer->bias));
+		fwrite(buf, 4, 1, f);
+
+		// cols
+		int32_to_MSB_4bytes(buf, matrix_get_cols(&layer->bias));
+		fwrite(buf, 4, 1, f);
+
+		// data
+		for(int i = 0; i < layer->bias.r*layer->bias.c; i ++){
+			double_to_MSB_bytes(buf, layer->bias.data[i]);
+			fwrite(buf, DOUBLE_SIZE, 1, f);
+		}
+	}
+
+	double_to_MSB_bytes(buf, EULER);
+	fwrite(buf, DOUBLE_SIZE, 1, f);
 
 
 	fclose(f);
@@ -330,7 +380,7 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
 
 ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	FILE *f;
-	int8_t buf[8];
+	int8_t buf[DOUBLE_SIZE > 4 ? DOUBLE_SIZE : 4];
 	uint16_t nn_size;
 
 	f = fopen(filename, "r");
@@ -363,6 +413,68 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 		printf("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
 	}
 
+	// sizeof double
+	if(fread(&buf, 1, 1, f) != 1) return MNIST_PARSE_ERROR;
+	int8_t double_size = buf[0];
+	if(double_size != sizeof(MATRIX_TYPE)){
+		dbgerr("Different double sizes, unable to parse");
+		return MNIST_PARSE_ERROR;
+	}
+
+	// train accuracy
+	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+	double train_accuracy = MSB_2bytes_to_int16(buf)/100.0;
+
+	printf("Network was tested with accuracy: %.2f %%\n", train_accuracy);
+
+
+	for(int i = 0; i < nn_size; i ++){
+		ceural_layer_t * layer = &nn->layers[i];
+
+		/* weights */
+		// rows
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		uint32_t rows = MSB_4bytes_to_int32(buf);
+	
+		// cols
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		uint32_t cols = MSB_4bytes_to_int32(buf);
+
+		//printf("Matrix: %dx%d\n", rows, cols);
+		if(rows != layer->weights.r) return MNIST_PARSE_ERROR;
+		if(cols != layer->weights.c) return MNIST_PARSE_ERROR;
+
+		for(int i = 0; i < rows*cols; i ++){
+			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+			layer->weights.data[i] = MSB_bytes_to_double(buf);
+		}
+		
+		/* bias */
+		// rows
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		rows = MSB_4bytes_to_int32(buf);
+		
+		// cols
+		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		cols = MSB_4bytes_to_int32(buf);
+
+		//printf("Matrix: %dx%d\n", rows, cols);
+		if(rows != layer->bias.r) return MNIST_PARSE_ERROR;
+		if(cols != layer->bias.c) return MNIST_PARSE_ERROR;
+
+		for(int i = 0; i < rows*cols; i ++){
+			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+			layer->bias.data[i] = MSB_bytes_to_double(buf);
+		}
+	}
+
+	if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+	double euler = MSB_bytes_to_double(buf);
+	printf("Euler's number: %f\n", euler);
+
+	if(fabs(EULER-euler) > 0.0001) dbgerrln("Wrong e");
+
+	
 	fclose(f);
 
 	return CEURAL_OK;

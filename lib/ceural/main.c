@@ -60,8 +60,12 @@ int main(){
 	ceural_net_forward(&nn, out, train_images.data[0]);
 	cstop(forward_phase);
 
+	puts("Loading NN...");
+	ceural_net_load_from_file(&nn, "data.ceural");
 
+	puts("Testing...");
 	ceural_net_test(&nn, &test_set);
+	
 
 	//ceural_net_backpropagate(&nn, train_images.data[0], train_labels.data[0]);
 	ceural_net_train(&nn, &train_set, 1, 32);
@@ -74,8 +78,10 @@ int main(){
 	printf("\n");
 	matrix_delete(out);
 
-	ceural_net_test(&nn, &test_set);
+	double accuracy = ceural_net_test(&nn, &test_set);
 
+	puts("Saving...");
+	ceural_net_save_to_file(&nn, "data.ceural", accuracy);
 
 	mnist_labels_free(&train_labels);
 	mnist_images_free(&train_images);

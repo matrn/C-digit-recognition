@@ -27,8 +27,8 @@ int main(){
 	ceural_net_create(&nn, &nn_def);
 
 	puts("---------------");
-	printf("save rtn: %d\n", ceural_net_save_to_file(&nn, "data.ceural"));
-	printf("load rtn: %d\n", ceural_net_load_from_file(&nn, "data.ceural"));
+	printf(">>save rtn: %d\n", ceural_net_save_to_file(&nn, "data.ceural", 94.01));
+	printf(">>load rtn: %d\n", ceural_net_load_from_file(&nn, "data.ceural"));
 
 	ceural_net_free(&nn);
 	return 0;
