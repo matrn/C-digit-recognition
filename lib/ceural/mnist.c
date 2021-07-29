@@ -1,27 +1,5 @@
 #include "include/mnist.h"
 
-int32_t MSB_4bytes_to_int(int8_t data[]){
-	union {
-		int32_t value;
-		int8_t data[4];
-	} num_cast;
-	memcpy(&num_cast.data, data, sizeof(int32_t));
-
-	if(IS_BIG_ENDIAN) return num_cast.value;
-	else return __bswap_32(num_cast.value);
-	/*
-
-	// source: https://stackoverflow.com/a/12792056/7351855
-	volatile uint32_t i=0x01234567;
-    // returns 0 for big endian, 1 for little endian.
-    if((*((uint8_t*)(&i))) == 0x67){
-		//return (unsigned char)(data[3]) | (unsigned char)(data[2]) << 8 | (unsigned char)(data[1]) << 16 | (unsigned char)(data[0]) << 24;
-		return htonl()
-	}else{
-		//return (unsigned char)(data[0]) | (unsigned char)(data[1]) << 8 | (unsigned char)(data[2]) << 16 | (unsigned char)(data[3]) << 24;
-	}
-	*/
-}
 
 
 mnist_rtn mnist_labels_load(mnist_labels_t * labels, char * filename){
@@ -35,10 +13,10 @@ mnist_rtn mnist_labels_load(mnist_labels_t * labels, char * filename){
 		int8_t buf[4];
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if(MSB_4bytes_to_int(buf) != 2049) return MNIST_PARSE_ERROR;   // magic
+		if(MSB_4bytes_to_int32(buf) != 2049) return MNIST_PARSE_ERROR;   // magic
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if((items_num = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
+		if((items_num = MSB_4bytes_to_int32(buf)) < 0) return MNIST_PARSE_ERROR;
 
 		labels->length = items_num;
 		labels->data = (uint8_t *)malloc(items_num*sizeof(uint8_t));
@@ -76,16 +54,16 @@ mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 		int8_t buf[4];
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if(MSB_4bytes_to_int(buf) != 2051) return MNIST_PARSE_ERROR;   // magic
+		if(MSB_4bytes_to_int32(buf) != 2051) return MNIST_PARSE_ERROR;   // magic
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if((items_num = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
+		if((items_num = MSB_4bytes_to_int32(buf)) < 0) return MNIST_PARSE_ERROR;
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if((rows = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
+		if((rows = MSB_4bytes_to_int32(buf)) < 0) return MNIST_PARSE_ERROR;
 
 		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
-		if((cols = MSB_4bytes_to_int(buf)) < 0) return MNIST_PARSE_ERROR;
+		if((cols = MSB_4bytes_to_int32(buf)) < 0) return MNIST_PARSE_ERROR;
 
 
 		images->length = items_num;

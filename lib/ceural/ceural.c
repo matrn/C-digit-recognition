@@ -24,6 +24,7 @@ void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 		matrix_alloc(&nn->layers[i].delta_sum, layer->output_dim, 1);
 		matrix_alloc(&nn->layers[i].grad_sum, layer->output_dim, layer->input_dim);
 
+		nn->layers[i].activation_function_enum = layer->activation;
 		switch(layer->activation){
 			case ACTIVATION_RELU:
 				nn->layers[i].activation_function = &ceural_relu;
@@ -260,31 +261,109 @@ void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 
 
 
-void ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
+ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
 	/*
 	#header #1
+		uint16_t, MSB - magic number - 420
 		uint16_t, MSB - number of layers
 	#layers:
 		uint16_t, MSB - input_dim
 		uint16_t, MSB - output_dim
 		int8_t - activation function
 	#header #2
-		uint16_t, MSB - magic number - 420
-	
+		int8_t - sizeof(double)
+		uint16_t, MSB - train accuracy (in %) * 100
+			
 	#layers - matrices:
 		## weights:
 			uint32_t, MSB - rows
 			uint32_t, MSB - cols
-			double, 8 bytes, MSB - data
+			double, MSB - data
 		## bias:
 			uint32_t, MSB - rows
 			uint32_t, MSB - cols
-			double, 8 bytes, MSB - data
+			double, MSB - data
+	
+	#check:
+		double, MSB - PI number +- 0.0001
 	*/
+	FILE *f;
+	int8_t buf[8];
+
+
+	f = fopen(filename, "w");
+	if(!f) return CEURAL_FILE_ERROR;
+	
 
 	
+
+	// magic number
+	int16_to_MSB_2bytes(buf, 420);
+	fwrite(buf, 2, 1, f);
+
+	// neural network number of layers
+	int16_to_MSB_2bytes(buf, nn->size);
+	fwrite(buf, 2, 1, f);
+
+	// layers
+	for(int i = 0; i < nn->size; i ++){
+		ceural_layer_t * layer = &nn->layers[i];
+
+		// input dim
+		int16_to_MSB_2bytes(buf, matrix_get_cols(&layer->weights));
+		fwrite(buf, 2, 1, f);
+
+		// output dim
+		int16_to_MSB_2bytes(buf, matrix_get_rows(&layer->weights));
+		fwrite(buf, 2, 1, f);
+
+		// activation function
+		int8_t activ_buf = (int8_t)layer->activation_function_enum;
+		fwrite(&activ_buf, 1, 1, f);
+	}
+
+
+	fclose(f);
+
+	return CEURAL_OK;
 }
 
-void ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
+ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
+	FILE *f;
+	int8_t buf[8];
+	uint16_t nn_size;
 
+	f = fopen(filename, "r");
+	if(!f) return CEURAL_FILE_ERROR;
+
+	// magic number
+	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+	if(MSB_2bytes_to_int16(buf) != 420) return MNIST_PARSE_ERROR;
+
+	// neural network number of layers
+	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+	nn_size = MSB_2bytes_to_int16(buf);
+
+	printf("nn size: %d\n", nn_size);
+
+
+	for(int i = 0; i < nn_size; i ++){
+		// input dim
+		if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+		uint16_t input_dim = MSB_2bytes_to_int16(buf);
+
+		// output dim
+		if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+		uint16_t output_dim = MSB_2bytes_to_int16(buf);
+
+		// activation function
+		if(fread(&buf, 1, 1, f) != 1) return MNIST_PARSE_ERROR;
+		int8_t activation_function = buf[0];
+
+		printf("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
+	}
+
+	fclose(f);
+
+	return CEURAL_OK;
 }

@@ -4,20 +4,15 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <byteswap.h>
 
 
 #include "../../lag/include/lag.h"
+#include "convert.h"
+
 
 #define MNIST_OK 0
 #define MNIST_FILE_ERROR -1
 #define MNIST_PARSE_ERROR -2
-
-
-#define IS_BIG_ENDIAN (!*(unsigned char *)&(uint16_t){1})
-
-
-int32_t MSB_4bytes_to_int(int8_t data[]);
 
 
 typedef int8_t mnist_rtn;
