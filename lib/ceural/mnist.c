@@ -1,14 +1,26 @@
 #include "include/mnist.h"
 
 int32_t MSB_4bytes_to_int(int8_t data[]){
+	union {
+		int32_t value;
+		int8_t data[4];
+	} num_cast;
+	memcpy(&num_cast.data, data, sizeof(int32_t));
+
+	if(IS_BIG_ENDIAN) return num_cast.value;
+	else return __bswap_32(num_cast.value);
+	/*
+
 	// source: https://stackoverflow.com/a/12792056/7351855
 	volatile uint32_t i=0x01234567;
-    // return 0 for big endian, 1 for little endian.
+    // returns 0 for big endian, 1 for little endian.
     if((*((uint8_t*)(&i))) == 0x67){
-		return (unsigned char)(data[3]) | (unsigned char)(data[2]) << 8 | (unsigned char)(data[1]) << 16 | (unsigned char)(data[0]) << 24;
+		//return (unsigned char)(data[3]) | (unsigned char)(data[2]) << 8 | (unsigned char)(data[1]) << 16 | (unsigned char)(data[0]) << 24;
+		return htonl()
 	}else{
-		return (unsigned char)(data[0]) | (unsigned char)(data[1]) << 8 | (unsigned char)(data[2]) << 16 | (unsigned char)(data[3]) << 24;
+		//return (unsigned char)(data[0]) | (unsigned char)(data[1]) << 8 | (unsigned char)(data[2]) << 16 | (unsigned char)(data[3]) << 24;
 	}
+	*/
 }
 
 
