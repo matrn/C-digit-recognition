@@ -66,4 +66,6 @@ void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set);
 
 void ceural_net_save_to_file(ceural_net_t * nn, const char * filename);
 void ceural_net_load_from_file(ceural_net_t * nn, const char * filename);
+
+
 #endif

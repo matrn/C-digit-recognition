@@ -253,7 +253,38 @@ void ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 		//printf("%d vs %d\n", predicted, expected);
 	}
 	printf("Correct: %d, Wrong: %d\n", correct, wrong);
-	printf("Accuracy: %f\n %%\n", ((double)correct/set_len)*100.0);
+	printf("Accuracy: %f %%\n", ((double)correct/set_len)*100.0);
 
 	matrix_delete(output);
+}
+
+
+
+void ceural_net_save_to_file(ceural_net_t * nn, const char * filename){
+	/*
+	#header #1
+		uint16_t, MSB - number of layers
+	#layers:
+		uint16_t, MSB - input_dim
+		uint16_t, MSB - output_dim
+		int8_t - activation function
+	#header #2
+		uint16_t, MSB - magic number - 420
+	
+	#layers - matrices:
+		## weights:
+			uint32_t, MSB - rows
+			uint32_t, MSB - cols
+			double, 8 bytes, MSB - data
+		## bias:
+			uint32_t, MSB - rows
+			uint32_t, MSB - cols
+			double, 8 bytes, MSB - data
+	*/
+
+	
+}
+
+void ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
+
 }
