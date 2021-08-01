@@ -44,12 +44,14 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
+#define DRAW_WIDTH 30
+
 /* Draw a rectangle on the surface at the given position */
 static void draw_brush(GtkWidget *widget, gdouble x, gdouble y) {
 	cairo_t *cr;
 	/* Paint to the surface, where we store our state */
 	cr = cairo_create(surface);
-	cairo_rectangle(cr, x - 3, y - 3, 6, 6);
+	cairo_rectangle(cr, x - DRAW_WIDTH/2, y - DRAW_WIDTH/2, DRAW_WIDTH, DRAW_WIDTH);
 	cairo_fill(cr);
 	cairo_destroy(cr);
 	/* Now invalidate the affected region of the drawing area. */
@@ -91,6 +93,7 @@ static gboolean motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event,
 static void close_window(void) {
 	if (surface) cairo_surface_destroy(surface);
 	gtk_main_quit();
+	nn_free();
 }
 
 
@@ -118,12 +121,13 @@ static void recognise(GtkWidget *widget, gpointer data) {
 			printf("%d ", (n >> b) & 1);
 		}*/
 		byte r = img_data[i];
-		byte b = img_data[++i];
 		byte g = img_data[++i];
+		byte b = img_data[++i];
 		byte a = img_data[++i];	 //alpha channel
 
 		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
 
+		//printf("%d ", gray);
 		//printf("%d %d %d-%d|", r, g, b, a);
 		if (gray != 0) {
 			//printf("%d: %d ", count, gray);
@@ -152,8 +156,56 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	//GBytes * img_bytes = g_bytes_new_from_bytes(img_data, 0, width*height*4);
 	GdkPixbuf *subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)), crop_x, crop_y, crop_w, crop_h);
 	//GdkPixbuf * pixbuf = gdk_pixbuf_new_from_bytes(cropped, GDK_COLORSPACE_RGB, false, 8, crop_cols, crop_rows, crop_cols*3);
-	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 100, 100, GDK_INTERP_BILINEAR);
+	subpixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
+	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 28, 28, GDK_INTERP_BILINEAR);
 	show_image(pixbuf);
+
+	uint8_t *buffer = gdk_pixbuf_get_pixels(pixbuf);
+
+	free(img);
+
+	printf("colorspace: %d\n", gdk_pixbuf_get_colorspace(pixbuf));
+
+	int pixels = gdk_pixbuf_get_width(pixbuf) * gdk_pixbuf_get_height(pixbuf);
+	int rows = gdk_pixbuf_get_height(pixbuf);
+	int cols = gdk_pixbuf_get_width(pixbuf);
+	printf("size: %dx%d\n", rows, cols);
+   	img = malloc(pixels*sizeof(byte));
+	index = 0;
+	for (int i = 0; i < pixels*3; i++) {
+		/*int n = img_data[i] | img_data[++i] << 8;
+		for(int b = 0; b < 32; b++){
+			printf("%d ", (n >> b) & 1);
+		}*/
+		byte r = buffer[i];
+		byte g = buffer[++i];
+		byte b = buffer[++i];
+		
+
+		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
+
+		//printf("%d %d %d|", r, g, b);
+		//printf("%d ", gray);
+		if (gray != 0) {
+			//printf("%d: %d ", count, gray);
+			count++;
+		}
+
+		img[index++] = gray;
+	}
+	free(buffer);
+	puts("");
+	printf("pixels: %d\n", pixels);
+
+
+	for(int row = 0; row < rows; row ++){
+		for(int col = 0; col < cols; col ++){
+			if(img[row*cols+col] == 0) printf(" ");
+			else printf("█");
+		}
+		puts("");
+	}
+	printf("RESULT: %d\n", nn_recognise(img));
 
 	free(img);
 	//free(cropped);
@@ -212,6 +264,8 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *button_box;
 	GtkWidget *vbox;
 
+	nn_init();
+
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), GUI_MAIN_WINDOW_NAME);
 	g_signal_connect(window, "destroy", G_CALLBACK(close_window), NULL);
@@ -227,7 +281,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
 
 	/* set a minimum size */
-	gtk_widget_set_size_request(drawing_area, 300, 400);
+	gtk_widget_set_size_request(drawing_area, 400, 400);
 	//gtk_container_add(GTK_CONTAINER(frame), drawing_area);
 
 	//button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);

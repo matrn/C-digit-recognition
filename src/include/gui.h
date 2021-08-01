@@ -2,8 +2,11 @@
 #define RECOG_GUI_H
 
 #include <gtk/gtk.h>
-#include "../../lib/ceural/include/ceural.h"
-#include "../../lib/lag/include/matrix.h"
+//#include "../../lib/ceural/include/ceural.h"
+//#include "../../lib/lag/include/matrix.h"
+#include <ceural.h>
+#include <lag.h>
+#include "nn.h"
 
 #define GUI_MAIN_WINDOW_NAME "C digit recognition"
 #define GUI_OUT_WINDOW_NAME "Cropped"
