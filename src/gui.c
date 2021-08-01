@@ -165,7 +165,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	free(img);
 
 	printf("colorspace: %d\n", gdk_pixbuf_get_colorspace(pixbuf));
-
+	printf("row stride: %d\n", gdk_pixbuf_get_rowstride(pixbuf));
 	int pixels = gdk_pixbuf_get_width(pixbuf) * gdk_pixbuf_get_height(pixbuf);
 	int rows = gdk_pixbuf_get_height(pixbuf);
 	int cols = gdk_pixbuf_get_width(pixbuf);
