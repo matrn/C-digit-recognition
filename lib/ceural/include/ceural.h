@@ -6,9 +6,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../../lag/include/lag.h"
+//#include "../../lag/include/lag.h"
 #include "../../lag/include/debug.h"
 #include "mnist.h"
+#include <lag.h>
+
 
 typedef int8_t ceural_rtn;
 #define CEURAL_OK 0

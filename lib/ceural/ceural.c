@@ -215,7 +215,7 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 		printf("Epoch #%d\n", epoch +1);
 
 		int set_len = train_set->images->length;
-		set_len = 5000;
+		//set_len = 5000;
 		puts("");
 		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
@@ -472,7 +472,7 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	double euler = MSB_bytes_to_double(buf);
 	printf("Euler's number: %f\n", euler);
 
-	if(fabs(EULER-euler) > 0.0001) dbgerrln("Wrong e");
+	if(fabs(EULER-euler) > 0.0001) dbgerrln("Something is wrong, I can feel it. e is incorrect");
 
 	
 	fclose(f);

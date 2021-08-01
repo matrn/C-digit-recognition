@@ -44,7 +44,7 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
-#define DRAW_WIDTH 30
+#define DRAW_WIDTH 40
 
 /* Draw a rectangle on the surface at the given position */
 static void draw_brush(GtkWidget *widget, gdouble x, gdouble y) {
@@ -172,7 +172,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	printf("size: %dx%d\n", rows, cols);
    	img = malloc(pixels*sizeof(byte));
 	index = 0;
-	for (int i = 0; i < pixels*3; i++) {
+	for (int i = 0; i < pixels*4; i++) {
 		/*int n = img_data[i] | img_data[++i] << 8;
 		for(int b = 0; b < 32; b++){
 			printf("%d ", (n >> b) & 1);
@@ -180,10 +180,11 @@ static void recognise(GtkWidget *widget, gpointer data) {
 		byte r = buffer[i];
 		byte g = buffer[++i];
 		byte b = buffer[++i];
-		
+		i++;
 
 		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
-
+		if(gray > 10) gray = 255;
+		else gray = 0;
 		//printf("%d %d %d|", r, g, b);
 		//printf("%d ", gray);
 		if (gray != 0) {
@@ -197,7 +198,8 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	puts("");
 	printf("pixels: %d\n", pixels);
 
-
+	rows = 28;
+	cols = 28;
 	for(int row = 0; row < rows; row ++){
 		for(int col = 0; col < cols; col ++){
 			if(img[row*cols+col] == 0) printf(" ");
@@ -265,6 +267,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *vbox;
 
 	nn_init();
+	//nn_test();
 
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), GUI_MAIN_WINDOW_NAME);

@@ -1,14 +1,14 @@
 CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG #-O2 -fomit-frame-pointer
-LDFLAGS+=-lm
+LDFLAGS+=-lm -llag -Wl,-R../../obj
 
 
-ceural: main.c ceural.c activations.c mnist.c convert.c ../../obj/lag.so
+ceural: main.c ceural.c activations.c mnist.c convert.c
 	cd ../lag && $(MAKE) lag.so
-	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
+	${CC} ${CFLAGS} -I../lag/include -L../../obj -o $@ $^ ${LDFLAGS}
 
-ceural.so: main.c ceural.c activations.c mnist.c convert.c ../../obj/lag.so
+ceural.so: main.c ceural.c activations.c mnist.c convert.c
 	cd ../lag && $(MAKE) lag.so
-	${CC} ${CFLAGS} -fPIC -shared -o ../../obj/$@ $^ ${LDFLAGS}
+	${CC} ${CFLAGS} -I../lag/include -L../../obj -fPIC -shared -o ../../obj/lib$@ $^ ${LDFLAGS}
 
 
 
