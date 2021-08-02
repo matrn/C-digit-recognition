@@ -582,3 +582,18 @@ uint8_t * matrix_1ubyteMat_crop_edges(matrix_size_t * out_rows, matrix_size_t * 
 
 	return out;
 }
+
+
+uint8_t * matrix_1ubyteMat_add_frame(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, matrix_size_t top_rows, matrix_size_t bottom_rows, matrix_size_t left_cols, matrix_size_t right_cols){
+	*out_rows = rows + top_rows + bottom_rows;
+	*out_cols = cols + left_cols + right_cols;
+	uint8_t * out = (uint8_t *)calloc((*out_rows)*(*out_cols), sizeof(uint8_t));
+
+	for(int row = 0; row < rows; row ++){
+		for(int col = 0; col < cols; col ++){
+			out[(row+top_rows)*(*out_cols)+left_cols+col] = mat[row*cols+col];
+		}
+	}
+
+	return out;
+}

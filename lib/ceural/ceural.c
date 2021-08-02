@@ -59,11 +59,24 @@ void ceural_net_free(ceural_net_t * nn){
 void ceural_net_forward(ceural_net_t * nn, matrix_t * output, mnist_pixel_t * input){
 	ceural_layer_t * input_layer = &nn->layers[0];
 
+	// int rows = 28;
+	// 		int cols = 28;
+	// 		for(int row = 0; row < rows; row ++){
+	// 			for(int col = 0; col < cols; col ++){
+	// 				//if(input[row*cols+col] == 0) printf(" ");
+	// 				//else printf("█");
+
+	// 				if(input[row*cols+col] > 0) input[row*cols+col] = 255;
+	// 				else input[row*cols+col] = 0;
+	// 			}
+	// 			//puts("");
+	// 		}
+
 	// printf("size: %ld\n", sizeof(input[0]));
 	// for(int i = 0; i < matrix_get_cols(&input_layer->weights); i ++){
 	// 	printf("#%d: %d\n", i, input[i]);
 	// }
-
+	//printf("s: %d\n", matrix_get_cols(&input_layer->weights));
 	//matrix_t * sum = matrix_new();
 	cstart(multiply_r1ubyte);
 	matrix_multiply_r1ubyteMat(&input_layer->sum, &input_layer->weights, input, matrix_get_cols(&input_layer->weights), 1);    // input_dim, 1
@@ -244,12 +257,25 @@ double ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 	int set_len = test_set->images->length;
 	matrix_t * output = matrix_new();
 	for(int i = 0; i < set_len; i ++){
+		
 		ceural_net_forward(nn, output, test_set->images->data[i]);
 		mnist_label_t predicted = matrix_argmax(output);
 		mnist_label_t expected = test_set->labels->data[i];
 
 		if(predicted == expected) correct += 1;
-		else wrong += 1;
+		else{
+			wrong += 1;
+			// int rows = 28;
+			// int cols = 28;
+			// uint8_t * img = test_set->images->data[i];
+			// for(int row = 0; row < rows; row ++){
+			// 	for(int col = 0; col < cols; col ++){
+			// 		if(img[row*cols+col] == 0) printf(" ");
+			// 		else printf("█");
+			// 	}
+			// 	puts("");
+			// }
+		}
 
 		//printf("%d vs %d\n", predicted, expected);
 	}

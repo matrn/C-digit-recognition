@@ -44,7 +44,7 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
-#define DRAW_WIDTH 40
+#define DRAW_WIDTH 20
 
 /* Draw a rectangle on the surface at the given position */
 static void draw_brush(GtkWidget *widget, gdouble x, gdouble y) {
@@ -141,6 +141,19 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	matrix_1ubyteMat_calculate_crop(&crop_x, &crop_x2, &crop_y, &crop_y2, img, height, width);
 	int crop_w = crop_x2 - crop_x + 1;
 	int crop_h = crop_y2 - crop_y + 1;
+	int max_size = max(crop_w, crop_h);
+	crop_x -= (max_size-crop_w)/2;
+	crop_y -= (max_size-crop_h)/2;
+
+	crop_w = crop_h = max_size;
+
+	if(crop_x + crop_w > width) crop_x -= crop_x+crop_w-width;
+	if(crop_x < 0) crop_x = 0;
+
+	if(crop_y+crop_h > height) crop_y -= crop_y+crop_h-height;
+	if(crop_y < 0) crop_y = 0;
+
+
 	printf("Cropped size: %dx%d\n", crop_w, crop_h);
 	//printf("at 0: %d\n", cropped[0]);
 	//if(cropped == NULL) puts("NULLL");
@@ -156,8 +169,8 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	//GBytes * img_bytes = g_bytes_new_from_bytes(img_data, 0, width*height*4);
 	GdkPixbuf *subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)), crop_x, crop_y, crop_w, crop_h);
 	//GdkPixbuf * pixbuf = gdk_pixbuf_new_from_bytes(cropped, GDK_COLORSPACE_RGB, false, 8, crop_cols, crop_rows, crop_cols*3);
-	subpixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
-	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 28, 28, GDK_INTERP_BILINEAR);
+	//subpixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
+	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);
 	show_image(pixbuf);
 
 	uint8_t *buffer = gdk_pixbuf_get_pixels(pixbuf);
@@ -183,7 +196,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 		i++;
 
 		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
-		if(gray > 10) gray = 255;
+		if(gray > 0) gray = 255;
 		else gray = 0;
 		//printf("%d %d %d|", r, g, b);
 		//printf("%d ", gray);
@@ -198,18 +211,19 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	puts("");
 	printf("pixels: %d\n", pixels);
 
-	rows = 28;
-	cols = 28;
+	uint8_t * img2 =matrix_1ubyteMat_add_frame(&rows, &cols, img, 18, 18, 5, 5, 5, 5);
+	printf("new_size: %dx%d\n", rows, cols);
 	for(int row = 0; row < rows; row ++){
 		for(int col = 0; col < cols; col ++){
-			if(img[row*cols+col] == 0) printf(" ");
+			if(img2[row*cols+col] == 0) printf(" ");
 			else printf("█");
 		}
 		puts("");
 	}
-	printf("RESULT: %d\n", nn_recognise(img));
+	printf("RESULT: %d\n", nn_recognise(img2));
 
 	free(img);
+	free(img2);
 	//free(cropped);
 
 	puts("");
