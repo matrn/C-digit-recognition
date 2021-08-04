@@ -7,7 +7,7 @@
 #include <math.h>
 
 //#include "../../lag/include/lag.h"
-#include "../../lag/include/debug.h"
+//#include "../../lag/include/debug.h"
 #include "mnist.h"
 #include <lag.h>
 

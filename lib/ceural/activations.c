@@ -6,7 +6,7 @@
  * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
  * @param[in] z pointer to the input matrix
  */
-void ceural_relu(matrix_t * out, const matrix_t * z){
+void ceural_relu(matrix_t* out, const matrix_t* z) {
 	//matrix_t * out = matrix_new();
 	//matrix_alloc(out, z->r, z->c);
 
@@ -21,12 +21,12 @@ void ceural_relu(matrix_t * out, const matrix_t * z){
  * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
  * @param[in] z pointer to the input matrix
  */
-void ceural_relu_derivative(matrix_t * out, const matrix_t * z){
+void ceural_relu_derivative(matrix_t* out, const matrix_t* z) {
 	//matrix_t * out = matrix_new();
 	//out->data = NULL;
 	matrix_copy(out, z);
 
-	for(int i = 0; i < z->r * z->c; i ++){
+	for (int i = 0; i < z->r * z->c; i++) {
 		out->data[i] = z->data[i] <= 0 ? 0 : 1;
 	}
 
@@ -39,16 +39,16 @@ void ceural_relu_derivative(matrix_t * out, const matrix_t * z){
  * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
  * @param[in] z pointer to the input matrix
  */
-void ceural_sigmoid(matrix_t * out, const matrix_t * z){
+void ceural_sigmoid(matrix_t* out, const matrix_t* z) {
 	// 1/(1+exp(-z))
 
 	//matrix_t * out = matrix_new();
 	//matrix_t * tmp = matrix_new();
-	
-	matrix_scale(out, z, -1);   // -z
-	matrix_exp_ew(out, out);   // exp(-z)
-	matrix_add_scalar(out, out, 1);   // 1 + exp(-z)
-	matrix_divide_lscalar(out, 1, out);   // 1/(1+exp(-z))
+
+	matrix_scale(out, z, -1);			 // -z
+	matrix_exp_ew(out, out);			 // exp(-z)
+	matrix_add_scalar(out, out, 1);		 // 1 + exp(-z)
+	matrix_divide_lscalar(out, 1, out);	 // 1/(1+exp(-z))
 
 	//matrix_free(tmp);
 
@@ -61,8 +61,8 @@ void ceural_sigmoid(matrix_t * out, const matrix_t * z){
  * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
  * @param[in] z pointer to the input matrix
  */
-void ceural_sigmoid_derivative(matrix_t * out, const matrix_t * z){
-	matrix_t * z_sigmoid = matrix_new();
+void ceural_sigmoid_derivative(matrix_t* out, const matrix_t* z) {
+	matrix_t* z_sigmoid = matrix_new();
 	ceural_sigmoid(z_sigmoid, z);
 	//matrix_t * out = matrix_new();
 

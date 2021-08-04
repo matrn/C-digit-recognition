@@ -6,7 +6,8 @@
 #include <stdlib.h>
 
 
-#include "../../lag/include/lag.h"
+//#include "../../lag/include/lag.h"
+#include <lag.h>
 #include "convert.h"
 
 
