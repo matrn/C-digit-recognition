@@ -2,7 +2,11 @@
 
 
 
-
+/**
+ * @brief allocates new matrix on heap memory and sets default parameters
+ * 
+ * @return matrix_t* returns pointer to allocated matrix_t memory
+ */
 matrix_t * matrix_new(){
 	matrix_t * new_mat = malloc(sizeof(matrix_t));
 	new_mat->data = NULL;
@@ -11,12 +15,23 @@ matrix_t * matrix_new(){
 	return new_mat;
 }
 
-
+/**
+ * @brief initializes matrix = sets rows & cols to 0 and data to NULL
+ * 
+ * @param mat pointer to matrix_t matrix
+ */
 void matrix_init(matrix_t * mat){
 	mat->r = mat->c = 0;   // null rows and cols
 	mat->data = NULL;
 }
 
+/**
+ * @brief allocates data memory of in mat matrix
+ * 
+ * @param mat pointer to the matrix_t matrix
+ * @param[in] rows number of rows to allocate
+ * @param[in] cols number of cols to allocate
+ */
 void matrix_alloc(matrix_t* mat, matrix_size_t rows, matrix_size_t cols) {
 	mat->r = rows;
 	mat->c = cols;
@@ -24,17 +39,33 @@ void matrix_alloc(matrix_t* mat, matrix_size_t rows, matrix_size_t cols) {
 	mat->data = (MATRIX_TYPE *)calloc(rows * cols, sizeof(MATRIX_TYPE));
 }
 
+/**
+ * @brief frees data memory of matrix
+ * 
+ * @param[in] mat pointer to the matrix_t matrix
+ */
 void matrix_free(matrix_t* mat) {
 	mat->r = mat->c = 0;
 	if (mat->data != NULL) free(mat->data);
 	mat->data = NULL;
 }
 
+/**
+ * @brief deletes matrix - frees data memory and free whole matrix which is allocated on the heap memory
+ * 
+ * @param[in] mat pointer to the matrix_t matrix
+ */
 void matrix_delete(matrix_t * mat){
 	matrix_free(mat);
 	free(mat);
 }
 
+/**
+ * @brief copies memory of src matrix into dst matrix
+ * 
+ * @param[out] dst pointer to the destination matrix
+ * @param[in] src pointer to the source matrix
+ */
 void matrix_copy(matrix_t * dst, const matrix_t * src){
 	if(dst == src){
 		//dbgln("Destination is same as the source, not copying");
@@ -44,9 +75,16 @@ void matrix_copy(matrix_t * dst, const matrix_t * src){
 	memcpy(dst->data, src->data, src->r*src->c*sizeof(MATRIX_TYPE));
 }
 
-
+/**
+ * @brief resizes matrix to new size rows*cols & also checks sizes to optimize performance
+ * 
+ * @param mat pointer to the matrix_t matrix
+ * @param[in] rows new size - rows
+ * @param[in] cols new size - cols
+ */
 void matrix_resize(matrix_t* mat, matrix_size_t rows, matrix_size_t cols) {
 	if (mat->r != rows || mat->c != rows) {
+		// check if allocated memory is the same size of required memory (and rows & cols are just swapped)
 		if (mat->r * mat->c == rows * cols) {
 			mat->r = rows;
 			mat->c = cols;
@@ -64,16 +102,37 @@ void matrix_resize(matrix_t* mat, matrix_size_t rows, matrix_size_t cols) {
 	}
 }
 
+/**
+ * @brief nulls matrix's data
+ * 
+ * @param[in] mat 
+ */
 void matrix_zero(matrix_t* mat) {
 	memset(mat->data, 0, sizeof(MATRIX_TYPE) * mat->r * mat->c);
 }
 
+/**
+ * @brief returns pointer to the element at coordinates row x col
+ * 
+ * @param[in] mat 
+ * @param[in] row 
+ * @param[in] col 
+ * @return MATRIX_TYPE* returns pointer to the element
+ */
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
 	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
 	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
 	return &mat->data[row*mat->c + col];
 }
 
+/**
+ * @brief returns value of the element at coordinates row x col
+ * 
+ * @param[in] mat 
+ * @param[in] row 
+ * @param[in] col 
+ * @return MATRIX_TYPE returns value of the element
+ */
 MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col) {
 	if(row >= mat->r) dbgerrln("Row is outside of matrix!");
 	if(col >= mat->c) dbgerrln("Col is outside of matrix!");
@@ -103,6 +162,12 @@ void matrix_print_wh(const matrix_t* mat, bool header) {
 	}
 }
 
+/**
+ * @brief creates identity matrix
+ * 
+ * @param mat 
+ * @return matrix_rtn returns MATRIX_OK if matrix has correct size, MATRIX_WRONG_SIZE otherwise 
+ */
 matrix_rtn matrix_eye(matrix_t* mat) {
 	if (mat->r != mat->c) {
 		dbgerrln("Matrix must be square");
