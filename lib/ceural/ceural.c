@@ -1,6 +1,11 @@
 #include "include/ceural.h"
 
-
+/**
+ * @brief function for allocating and generating neural network nn by it's definition nn_deg
+ * 
+ * @param nn pointer to neural network structure
+ * @param nn_def pointer to neural network definition structure
+ */
 void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 	nn->size = nn_def->layers;
 	nn->layers = (ceural_layer_t *)malloc(nn->size*sizeof(ceural_layer_t));
@@ -40,7 +45,11 @@ void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 
 }
 
-
+/**
+ * @brief frees neural network's memory
+ * 
+ * @param nn pointer to neural network structure
+ */
 void ceural_net_free(ceural_net_t * nn){
 	for(int i = 0; i < nn->size; i ++){
 		ceural_layer_t * layer = &nn->layers[i];
@@ -55,7 +64,13 @@ void ceural_net_free(ceural_net_t * nn){
 	free(nn->layers);
 }
 
-
+/**
+ * @brief forward phase of neural network
+ * 
+ * @param nn pointer to neural network structure
+ * @param output pointer to memory where will be output of the neural network stored, matrix must be initialized using matrix_new()/matrix_init()/matrix_alloc()
+ * @param input input vector in the form of uint8_t array
+ */
 void ceural_net_forward(ceural_net_t * nn, matrix_t * output, mnist_pixel_t * input){
 	ceural_layer_t * input_layer = &nn->layers[0];
 
@@ -109,7 +124,11 @@ void ceural_net_forward(ceural_net_t * nn, matrix_t * output, mnist_pixel_t * in
 	// }
 }
 
-
+/**
+ * @brief resets delta & gradient sums which are used in training process sped up by using batches of data
+ * 
+ * @param nn pointer to the neural network
+ */
 void ceural_net_reset_sums(ceural_net_t * nn){
 	for(int i = 0; i < nn->size; i ++){
 		matrix_zero(&nn->layers[i].delta_sum);
@@ -117,7 +136,13 @@ void ceural_net_reset_sums(ceural_net_t * nn){
 	}
 }
 
-
+/**
+ * @brief calculates the backward phase and delta & gradient values using backpropgation algorithm
+ * 
+ * @param nn pointer to the neural network
+ * @param input vector of input image - array of uint8_t values
+ * @param expected_output_label expected output - number with type uint8_t
+ */
 void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_label_t expected_output_label){
 	ceural_layer_t * output_layer = &nn->layers[nn->size-1];
 
@@ -195,7 +220,13 @@ void ceural_net_backpropagate(ceural_net_t * nn, mnist_pixel_t * input, mnist_la
 	matrix_delete(activation_d);	
 }
 
-
+/**
+ * @brief updates weights & biases of the neural network
+ * 
+ * @param nn pointer to the neural network
+ * @param learning_rate learning rate of weights update process. 0.001 is recommended
+ * @param batch_size size of mini batches which are used in order to speed up learning process
+ */
 void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t batch_size){
 	for(int i = 0; i < nn->size; i ++){
 		ceural_layer_t * layer = &nn->layers[i];
@@ -222,7 +253,14 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
 	}
 }
 
-
+/**
+ * @brief handles process of training neural network - separates train set into mini batches, calls backrpopagation function and updates weights
+ * 
+ * @param nn pointer to the neural network structure
+ * @param train_set pointer to the train set structure
+ * @param epochs number of epochs - 1 epoch means going through the whole dataset once
+ * @param batch_size size of batches
+ */
 void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size){
 	for(int epoch = 0; epoch < epochs; epoch ++){
 		printf("Epoch #%d\n", epoch +1);
@@ -249,6 +287,13 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 	}
 }
 
+/**
+ * @brief tests neural network accuracy using test dataset
+ * 
+ * @param nn pointer to the neural network structure
+ * @param test_set pointer to the test dataset structure
+ * @return double returns accuracy of the neural network on the provided test set 
+ */
 double ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 	int correct = 0;
 	int wrong = 0;
@@ -289,8 +334,15 @@ double ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set){
 }
 
 
-
-ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, double train_accuracy){
+/**
+ * @brief saves neural network's structure, weights and biases to the file
+ * 
+ * @param nn pointer to the neural network structure
+ * @param filename output file's filename
+ * @param test_accuracy accuracy returned by neural network test. Use -1 if neural network was not tested
+ * @return ceural_rtn returns CEURAL_OK if everything went smooth and negative value in case of error (in this case only CEURAL_FILE_ERROR)
+ */
+ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, double test_accuracy){
 	/*
 	#header #1
 		uint16_t, MSB - magic number - 420
@@ -357,7 +409,7 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, dou
 
 
 	// train accuracy
-	int16_to_MSB_2bytes(buf, train_accuracy*100+0.5);
+	int16_to_MSB_2bytes(buf, test_accuracy*100+0.5);
 	fwrite(buf, 2, 1, f);
 
 	// weights & biases
@@ -404,6 +456,13 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, dou
 	return CEURAL_OK;
 }
 
+/**
+ * @brief tries to load neural network from the file and validate its compatibility with passed neural network nn
+ * 
+ * @param nn pointer to the neural network structure which will be filled with correct weights and biases
+ * @param filename filename of the ceural data file
+ * @return ceural_rtn returns CEURAL_OK if everything was successful, negative value otherwise (CEURAL_FILE_ERROR or CEURAL_PARSE_ERROR)
+ */
 ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	FILE *f;
 	int8_t buf[DOUBLE_SIZE > 4 ? DOUBLE_SIZE : 4];
@@ -449,9 +508,9 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 
 	// train accuracy
 	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
-	double train_accuracy = MSB_2bytes_to_int16(buf)/100.0;
+	double test_accuracy = MSB_2bytes_to_int16(buf)/100.0;
 
-	printf("Network was tested with accuracy: %.2f %%\n", train_accuracy);
+	printf("Network was tested with accuracy: %.2f %%\n", test_accuracy);
 
 
 	for(int i = 0; i < nn_size; i ++){

@@ -76,7 +76,7 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
 void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size);
 double ceural_net_test(ceural_net_t * nn, mnist_set_t * test_set);
 
-ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, double train_accuracy);
+ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, double test_accuracy);
 ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename);
 
 
