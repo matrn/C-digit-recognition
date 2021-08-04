@@ -1,7 +1,13 @@
 #include "include/mnist.h"
 
 
-
+/**
+ * @brief load MNIST labels into mnist_labels_t structure
+ * 
+ * @param[out] labels pointer to the mnist_labels_t structure
+ * @param[in] filename filename of the MNIST labels file
+ * @return mnist_rtn returns MNIST_OK if ok, negative value otherwise (MNIST_FILE_ERROR or MNIST_PARSE_ERROR)
+ */
 mnist_rtn mnist_labels_load(mnist_labels_t * labels, char * filename){
 	int32_t items_num;
 	FILE *f;
@@ -35,12 +41,22 @@ mnist_rtn mnist_labels_load(mnist_labels_t * labels, char * filename){
 	return MNIST_FILE_ERROR;
 }
 
-
+/**
+ * @brief frees mnist labels memory
+ * 
+ * @param[in] labels pointer to the mnist_labels_t structure
+ */
 void mnist_labels_free(mnist_labels_t * labels){
 	free(labels->data);
 }
 
-
+/**
+ * @brief loads MNIST images into mnis_images_t structure
+ * 
+ * @param[out] images pointer to the mnist_images_t structure
+ * @param[in] filename filename of MNIST images file
+ * @return mnist_rtn returns MNIST_OK if ok, negative value otherwise (MNIST_FILE_ERROR or MNIST_PARSE_ERROR)returns MNIST_OK if ok, negative value otherwise (MNIST_FILE_ERROR or MNIST_PARSE_ERROR)
+ */
 mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 	int32_t items_num;
 	int32_t rows, cols;
@@ -86,7 +102,11 @@ mnist_rtn mnist_images_load(mnist_images_t* images, char* filename){
 }
 
 
-
+/**
+ * @brief frees mnist images memory
+ * 
+ * @param[in] images pointer to the mnist_images_t structure
+ */
 void mnist_images_free(mnist_images_t* images){
 	if(images->data == NULL) return;
 
@@ -101,7 +121,12 @@ void mnist_images_free(mnist_images_t* images){
 }
 
 
-
+/**
+ * @brief convert mnist_labels_t (uint8_t) into matrix_t vector
+ * 
+ * @param[out] label_mat pointer to the output matrix_t vector
+ * @param[in] label input label (number)
+ */
 void mnist_label_vectorize(matrix_t * label_mat, mnist_label_t label){
 	matrix_resize(label_mat, 10, 1);
 	matrix_zero(label_mat);

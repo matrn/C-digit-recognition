@@ -1,6 +1,11 @@
 #include "include/ceural.h"
 
-
+/**
+ * @brief calculates element wise ReLu function output
+ * 
+ * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
+ * @param[in] z pointer to the input matrix
+ */
 void ceural_relu(matrix_t * out, const matrix_t * z){
 	//matrix_t * out = matrix_new();
 	//matrix_alloc(out, z->r, z->c);
@@ -10,6 +15,12 @@ void ceural_relu(matrix_t * out, const matrix_t * z){
 	//return out;
 }
 
+/**
+ * @brief calculates element wise derivation of ReLu activation function
+ * 
+ * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
+ * @param[in] z pointer to the input matrix
+ */
 void ceural_relu_derivative(matrix_t * out, const matrix_t * z){
 	//matrix_t * out = matrix_new();
 	//out->data = NULL;
@@ -22,6 +33,12 @@ void ceural_relu_derivative(matrix_t * out, const matrix_t * z){
 	//return out;
 }
 
+/**
+ * @brief calculates element wise Sigmoid function
+ * 
+ * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
+ * @param[in] z pointer to the input matrix
+ */
 void ceural_sigmoid(matrix_t * out, const matrix_t * z){
 	// 1/(1+exp(-z))
 
@@ -38,7 +55,12 @@ void ceural_sigmoid(matrix_t * out, const matrix_t * z){
 	//return out;
 }
 
-
+/**
+ * @brief calculates element wise derivation of Sigmoid function
+ * 
+ * @param[out] out pointer to the output matrix - must be initiliazed but size can be incorrect
+ * @param[in] z pointer to the input matrix
+ */
 void ceural_sigmoid_derivative(matrix_t * out, const matrix_t * z){
 	matrix_t * z_sigmoid = matrix_new();
 	ceural_sigmoid(z_sigmoid, z);
