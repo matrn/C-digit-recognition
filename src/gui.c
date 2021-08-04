@@ -1,8 +1,41 @@
 #include "include/gui.h"
+#include <assert.h>
+
 
 void show_image(GdkPixbuf *data) {
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
 	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
+}
+
+/*
+void show_1ubyte_image(uint8_t * img){
+ gdk_pixbuf_new_from_bytes()
+}
+*/
+
+uint8_t * gdk_pixbuf_to_uint8_grayscale(GdkPixbuf * pixbuf){
+	int rows = gdk_pixbuf_get_height(pixbuf);
+	int cols = gdk_pixbuf_get_width(pixbuf);
+	//printf("%dx%d, sride. %d\n", rows, cols, gdk_pixbuf_get_rowstride(pixbuf));
+	assert(gdk_pixbuf_get_rowstride(pixbuf) == cols*4);
+	
+	uint8_t *buffer = gdk_pixbuf_get_pixels(pixbuf);
+   	uint8_t * img_out = malloc(rows*cols*sizeof(uint8_t));
+	int index = 0;
+	for (int i = 0; i < rows*cols*4; i++) {	
+		uint8_t r = buffer[i];
+		uint8_t g = buffer[++i];
+		uint8_t b = buffer[++i];
+		i++;   //uint8_t a = buffer[++i];
+
+		uint8_t gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
+		//if(gray > 0) gray = 255;
+		//else gray = 0;
+		img_out[index++] = gray;
+	}
+
+	free(buffer);
+	return img_out;
 }
 
 static void clear_surface(void) {
@@ -111,34 +144,14 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	int height = cairo_image_surface_get_height(img_surface);
 
 	cairo_format_t format = cairo_image_surface_get_format(img_surface);
+	
 
-	byte *img = (byte *)malloc(width * height * sizeof(byte));
-	int index = 0;
-	int count = 0;
-	for (int i = 0; i < width * height * 4; i++) {
-		/*int n = img_data[i] | img_data[++i] << 8;
-		for(int b = 0; b < 32; b++){
-			printf("%d ", (n >> b) & 1);
-		}*/
-		byte r = img_data[i];
-		byte g = img_data[++i];
-		byte b = img_data[++i];
-		byte a = img_data[++i];	 //alpha channel
-
-		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
-
-		//printf("%d ", gray);
-		//printf("%d %d %d-%d|", r, g, b, a);
-		if (gray != 0) {
-			//printf("%d: %d ", count, gray);
-			count++;
-		}
-
-		img[index++] = gray;
-	}
+	
 	int crop_x, crop_y, crop_x2, crop_y2;
 	//cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
-	matrix_1ubyteMat_calculate_crop(&crop_x, &crop_x2, &crop_y, &crop_y2, img, height, width);
+	const uint8_t null_values[] = {255,255,255,255};
+	//matrix_1ubyteMat_calculate_crop_old(&crop_x, &crop_x2, &crop_y, &crop_y2, img, height, width);
+	matrix_1ubyteMat_calculate_crop(&crop_x, &crop_x2, &crop_y, &crop_y2, img_data, height, width, 4, null_values);
 	int crop_w = crop_x2 - crop_x + 1;
 	int crop_h = crop_y2 - crop_y + 1;
 	int max_size = max(crop_w, crop_h);
@@ -152,9 +165,9 @@ static void recognise(GtkWidget *widget, gpointer data) {
 
 	if(crop_y+crop_h > height) crop_y -= crop_y+crop_h-height;
 	if(crop_y < 0) crop_y = 0;
-
-
+	
 	printf("Cropped size: %dx%d\n", crop_w, crop_h);
+	printf("Crop position: x=%d, y=%d\n", crop_x, crop_y);
 	//printf("at 0: %d\n", cropped[0]);
 	//if(cropped == NULL) puts("NULLL");
 	//puts("ENDCROP");
@@ -173,43 +186,8 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);
 	show_image(pixbuf);
 
-	uint8_t *buffer = gdk_pixbuf_get_pixels(pixbuf);
-
-	free(img);
-
-	printf("colorspace: %d\n", gdk_pixbuf_get_colorspace(pixbuf));
-	printf("row stride: %d\n", gdk_pixbuf_get_rowstride(pixbuf));
-	int pixels = gdk_pixbuf_get_width(pixbuf) * gdk_pixbuf_get_height(pixbuf);
-	int rows = gdk_pixbuf_get_height(pixbuf);
-	int cols = gdk_pixbuf_get_width(pixbuf);
-	printf("size: %dx%d\n", rows, cols);
-   	img = malloc(pixels*sizeof(byte));
-	index = 0;
-	for (int i = 0; i < pixels*4; i++) {
-		/*int n = img_data[i] | img_data[++i] << 8;
-		for(int b = 0; b < 32; b++){
-			printf("%d ", (n >> b) & 1);
-		}*/
-		byte r = buffer[i];
-		byte g = buffer[++i];
-		byte b = buffer[++i];
-		i++;
-
-		byte gray = 255 - (r * 0.3 + g * 0.59 + b * 0.11);
-		if(gray > 0) gray = 255;
-		else gray = 0;
-		//printf("%d %d %d|", r, g, b);
-		//printf("%d ", gray);
-		if (gray != 0) {
-			//printf("%d: %d ", count, gray);
-			count++;
-		}
-
-		img[index++] = gray;
-	}
-	free(buffer);
-	puts("");
-	printf("pixels: %d\n", pixels);
+	uint8_t * img = gdk_pixbuf_to_uint8_grayscale(pixbuf);
+	int rows, cols;
 
 	uint8_t * img2 =matrix_1ubyteMat_add_frame(&rows, &cols, img, 18, 18, 5, 5, 5, 5);
 	printf("new_size: %dx%d\n", rows, cols);
@@ -227,7 +205,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	//free(cropped);
 
 	puts("");
-
+	/*
 	printf("stride: %d\n", cairo_image_surface_get_stride(surface));
 	printf("w x h: %dx%d\n", width, height);
 	printf("format: %d\n", format);
@@ -260,7 +238,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 		case CAIRO_FORMAT_RGB30:
 			puts("CAIRO_FORMAT_RGB30");
 			break;
-	}
+	}*/
 	/*
 	cairo_pattern_t *pattern = cairo_pattern_create_for_surface (img_surface);
 	cairo_t * cr;
@@ -279,6 +257,8 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *button;
 	GtkWidget *button_box;
 	GtkWidget *vbox;
+
+	int main_x, main_y;
 
 	nn_init();
 	//nn_test();
@@ -299,6 +279,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 
 	/* set a minimum size */
 	gtk_widget_set_size_request(drawing_area, 400, 400);
+	
 	//gtk_container_add(GTK_CONTAINER(frame), drawing_area);
 
 	//button_box = gtk_button_box_new(GTK_ORIENTATION_HORIZONTAL);
@@ -322,6 +303,9 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
     */
 	gtk_widget_set_events(drawing_area, gtk_widget_get_events(drawing_area) | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
 	gtk_widget_show_all(window);
+	//gtk_window_get_position(GTK_WINDOW(window), &main_x, &main_y);
+	gtk_window_move(GTK_WINDOW(window), 300, 300);
+	//printf("X: %d, Y: %d\n", main_x, main_y);
 
 	GtkWidget *box;
 
@@ -336,6 +320,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 
 	gtk_container_add(GTK_CONTAINER(window), box);
 	gtk_widget_set_size_request(box, 200, 200);
+	gtk_window_move(GTK_WINDOW(window), 800, 300);
 
 	/* Exit when the window is closed */
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);

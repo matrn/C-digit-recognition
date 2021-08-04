@@ -455,7 +455,90 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsig
 	}
 }
 
- void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols){
+
+void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, uint8_t pixel_bytes, const uint8_t null_values[]){
+	//matrix_size_t index;
+	
+	matrix_size_t top_rows = 0;
+	//index = 0;
+	puts("A");
+	for(int row = 0; row < rows; row ++){
+		for(int col = 0; col < cols*pixel_bytes;){
+			//printf("i: %d\n", col);
+			for(int i = 0; i < pixel_bytes; i ++){
+				// printf("%d: %d | ", row*cols*pixel_bytes+col, mat[row*cols*pixel_bytes+col] );
+				if(mat[row*cols*pixel_bytes+col] != null_values[i]){
+					top_rows = row;
+					row = rows;
+					col = cols*pixel_bytes;
+					break;
+				}
+				col ++;
+			}
+		}
+	}
+
+	matrix_size_t bottom_rows = 0;
+	//index = 0;
+	puts("B");
+	for(int row = rows-1; row >= 0; row --){
+		for(int col = 0; col < cols*pixel_bytes;){
+			for(int i = 0; i < pixel_bytes; i ++){
+				if(mat[row*cols*pixel_bytes+col] != null_values[i]){
+					bottom_rows = row;
+					row = -1;
+					col = cols*pixel_bytes;
+					break;
+				}
+				col ++;
+			}
+		
+		}
+	}
+
+	matrix_size_t left_cols = 0;
+	//index = 0;
+	puts("C");
+	for(int col = 0; col < cols*pixel_bytes;){
+		for(int i = 0; i < pixel_bytes; i ++){
+			for(int row = top_rows; row <= bottom_rows; row ++){
+				if(mat[row*cols*pixel_bytes+col] != null_values[i]){
+					left_cols = col/pixel_bytes;
+					col = cols*pixel_bytes;
+					i = pixel_bytes;
+					break;
+				}
+			}
+			col ++;
+		}
+	}
+
+	matrix_size_t right_cols = 0;
+	//index = 0;
+	puts("D");
+	for(int col = cols*pixel_bytes-1; col >= 0; ){
+		for(int i = pixel_bytes-1; i >= 0; i --){
+			for(int row = top_rows; row <= bottom_rows; row ++){
+				if(mat[row*cols*pixel_bytes+col] != null_values[i]){
+					right_cols = col/pixel_bytes;
+					col = -1;
+					i = -1;
+					break;
+				}
+			}
+			col --;
+		}
+	}
+	puts("DONE");
+	*width_start = left_cols;
+	*width_stop = right_cols;
+
+	*height_start = top_rows;
+	*height_stop = bottom_rows;
+}
+
+
+void matrix_1ubyteMat_calculate_crop_old(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols){
 	matrix_size_t top_rows = 0;
 	for(int row = 0; row < rows; row ++){
 		for(int col = 0; col < cols; col ++){
@@ -506,6 +589,7 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsig
 	*height_start = top_rows;
 	*height_stop = bottom_rows;
 }
+
 
 
 uint8_t * matrix_1ubyteMat_crop_edges(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols){
