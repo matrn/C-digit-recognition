@@ -7,6 +7,8 @@
  * @param[in] nn_def pointer to neural network definition structure
  */
 void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
+	assert(nn_def->layers >= 2);
+	
 	nn->size = nn_def->layers;
 	nn->layers = (ceural_layer_t *)malloc(nn->size*sizeof(ceural_layer_t));
 
