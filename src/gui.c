@@ -259,7 +259,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	//free(cropped);
 
 	puts("");
-	/*
+	
 	printf("stride: %d\n", cairo_image_surface_get_stride(surface));
 	printf("w x h: %dx%d\n", width, height);
 	printf("format: %d\n", format);
@@ -292,7 +292,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 		case CAIRO_FORMAT_RGB30:
 			puts("CAIRO_FORMAT_RGB30");
 			break;
-	}*/
+	}
 	/*
 	cairo_pattern_t *pattern = cairo_pattern_create_for_surface (img_surface);
 	cairo_t * cr;
