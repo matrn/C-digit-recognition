@@ -11,10 +11,15 @@
 
 #include "debug.h"
 
- #define max(a,b) \
+/*
+#define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
+*/
+#define max(x, y) (((x) > (y)) ? (x) : (y))
+#define min(x, y) (((x) < (y)) ? (x) : (y))
+
 
 #define MATRIX_TYPE double
 
@@ -50,7 +55,8 @@ void matrix_print_size(const matrix_t * mat);
 
 
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
-MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);	
+MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
+MATRIX_TYPE* matrix_at_index(const matrix_t* mat, const matrix_size_t index);
 
 matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b);
 matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b);
@@ -99,7 +105,7 @@ void matrix_transpose(matrix_t * dst, matrix_t * src);
 
 //matrix_rtn matrix_1ubyteMat_crop_edges(uint8_t * out, matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols);
 uint8_t * matrix_1ubyteMat_crop_edges(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols);
-void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, uint8_t pixel_bytes, const uint8_t null_values[]);
+void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, const uint8_t * mat, const matrix_size_t rows, const matrix_size_t cols, const uint8_t pixel_bytes, const uint8_t null_values[]);
 void matrix_1ubyteMat_calculate_crop_old(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols);
 uint8_t * matrix_1ubyteMat_add_frame(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, matrix_size_t top_rows, matrix_size_t bottom_rows, matrix_size_t left_cols, matrix_size_t right_cols);
 

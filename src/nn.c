@@ -21,7 +21,7 @@ ceural_net_definition_t nn_def = {
 void nn_init() {
 	ceural_net_create(&nn, &nn_def);
 
-	puts("Loading NN...");
+	dbgln("Loading NN...");
 	if (ceural_net_load_from_file(&nn, NN_DATA_FILENAME) != CEURAL_OK) nn_train();
 }
 
@@ -40,12 +40,12 @@ void nn_train() {
 		.images = &train_images,
 		.labels = &train_labels};
 
-	puts("Training...");
+	dbgln("Training...");
 	ceural_net_train(&nn, &train_set, 1, 32);
 
 	double accuracy = nn_test();
 
-	puts("Saving...");
+	dbgln("Saving...");
 	ceural_net_save_to_file(&nn, NN_DATA_FILENAME, accuracy);
 
 	mnist_labels_free(&train_labels);
@@ -63,7 +63,7 @@ double nn_test() {
 		.images = &test_images,
 		.labels = &test_labels};
 
-	puts("Testing...");
+	dbgln("Testing...");
 	double accuracy = ceural_net_test(&nn, &test_set);
 
 	mnist_labels_free(&test_labels);
@@ -76,10 +76,14 @@ int8_t nn_recognise(uint8_t* img, matrix_t *out) {
 	//matrix_t* out = matrix_new();  //calloc(10, sizeof(double));
 
 	ceural_net_forward(&nn, out, img);
+
+	dbgexec({
 	for (int i = 0; i < 10; i++) printf("%-8d", i);
 	printf("\n");
 	for (int i = 0; i < 10; i++) printf("%-8.3f", matrix_atv(out, i, 0));
 	printf("\n");
+	});
+
 	uint8_t result = matrix_argmax(out);
 	//*accuracy = matrix_max(out);
 	//matrix_delete(out);

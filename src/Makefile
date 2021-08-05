@@ -1,4 +1,4 @@
-CFLAGS+=-g #-pedantic -Wall -Werror -DDEBUG
+CFLAGS+=-g -pedantic -Wall -Werror #-DDEBUG
 LDFLAGS+=-L../obj -lceural -llag -Wl,-R../obj
 GTKFLAGS+=`pkg-config gtk+-3.0 --cflags`
 GTKLIBS+=`pkg-config gtk+-3.0 --libs`

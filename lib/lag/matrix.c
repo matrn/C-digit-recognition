@@ -139,6 +139,10 @@ MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matri
 	return mat->data[row*mat->c + col];
 }
 
+MATRIX_TYPE* matrix_at_index(const matrix_t* mat, const matrix_size_t index){
+	return &mat->data[index];
+}
+
 
 void matrix_print(const matrix_t* mat) {
 	matrix_print_wh(mat, false);
@@ -677,12 +681,8 @@ void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsig
 }
 
 
-void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, uint8_t pixel_bytes, const uint8_t null_values[]){
-	//matrix_size_t index;
-	
+void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * height_start, int * height_stop, const uint8_t * mat, const matrix_size_t rows, const matrix_size_t cols, const uint8_t pixel_bytes, const uint8_t null_values[]){
 	matrix_size_t top_rows = 0;
-	//index = 0;
-	puts("A");
 	for(int row = 0; row < rows; row ++){
 		for(int col = 0; col < cols*pixel_bytes;){
 			//printf("i: %d\n", col);
@@ -700,8 +700,6 @@ void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * 
 	}
 
 	matrix_size_t bottom_rows = 0;
-	//index = 0;
-	puts("B");
 	for(int row = rows-1; row >= 0; row --){
 		for(int col = 0; col < cols*pixel_bytes;){
 			for(int i = 0; i < pixel_bytes; i ++){
@@ -718,8 +716,6 @@ void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * 
 	}
 
 	matrix_size_t left_cols = 0;
-	//index = 0;
-	puts("C");
 	for(int col = 0; col < cols*pixel_bytes;){
 		for(int i = 0; i < pixel_bytes; i ++){
 			for(int row = top_rows; row <= bottom_rows; row ++){
@@ -735,8 +731,6 @@ void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * 
 	}
 
 	matrix_size_t right_cols = 0;
-	//index = 0;
-	puts("D");
 	for(int col = cols*pixel_bytes-1; col >= 0; ){
 		for(int i = pixel_bytes-1; i >= 0; i --){
 			for(int row = top_rows; row <= bottom_rows; row ++){
@@ -750,7 +744,7 @@ void matrix_1ubyteMat_calculate_crop(int * width_start, int * width_stop, int * 
 			col --;
 		}
 	}
-	puts("DONE");
+
 	*width_start = left_cols;
 	*width_stop = right_cols;
 

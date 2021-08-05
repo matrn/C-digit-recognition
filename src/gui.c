@@ -1,8 +1,31 @@
 #include "include/gui.h"
 
+
+// from: https://code.woboq.org/gtk/gtk/examples/drawing.c.html
+/* Surface to store current scribbles */
+static cairo_surface_t *surface = NULL;
+static int surface_width = -1;
+static int surface_height = -1;
+
+static GtkWidget *image;
+
+
+
 void gui_display_image(GdkPixbuf *data) {
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
 	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
+}
+
+void ascii_display_grayscale_matrix(const uint8_t*img, const int rows, const int cols){
+	for (int row = 0; row < rows; row++) {
+		for (int col = 0; col < cols; col++) {
+			if (img[row * cols + col] == 0)
+				printf(" ");
+			else
+				printf("█");
+		}
+		puts("");
+	}
 }
 
 static void gui_display_results(const uint8_t results[], const double accuracies[]){
@@ -91,10 +114,11 @@ static gboolean configure_event_cb(GtkWidget *widget, GdkEventConfigure *event, 
 	surface_height = gtk_widget_get_allocated_height(widget);
 	surface = gdk_window_create_similar_image_surface(gtk_widget_get_window(widget), CAIRO_FORMAT_ARGB32, surface_width, surface_height, 0);
 	//surface = cairo_image_surface_create(CAIRO_FORMAT_A8, surface_width, surface_height);
-
+	
+	/*
 	int width = cairo_image_surface_get_width(surface);
 	int height = cairo_image_surface_get_height(surface);
-	printf("config: w x h: %dx%d\n", width, height);
+	*/
 
 	/* Initialize the surface to white */
 	clear_surface();
@@ -163,117 +187,93 @@ static gboolean motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event,
 
 
 static void recognise(GtkWidget *widget, gpointer data) {
-	g_print("Recognise\n");
-
+	GdkPixbuf *pixbuf, *subpixbuf;
+	
 	cairo_surface_flush(surface);
-	cairo_surface_t *img_surface = surface;	 //cairo_surface_create_similar_image(surface, cairo_surface_get_type(surface), surface_width, surface_height);
+	assert(cairo_image_surface_get_format(surface) == CAIRO_FORMAT_ARGB32);
 
-	assert(cairo_image_surface_get_format(img_surface) == CAIRO_FORMAT_ARGB32);
-
-	//cairo_surface_t * img_surface = cairo_image_surface_create_for_data(img_surface_src, cairo_image_surface_get_format(img_surface_src), surface_width, surface_height, cairo_format_stride_for_width(img_surface_src));
-
-	unsigned char *img_data = cairo_image_surface_get_data(img_surface);
-	int width = cairo_image_surface_get_width(img_surface);
-	int height = cairo_image_surface_get_height(img_surface);
+	const unsigned char * const img_data = cairo_image_surface_get_data(surface);
+	const int width = cairo_image_surface_get_width(surface);
+	const int height = cairo_image_surface_get_height(surface);
 
 	int crop_x, crop_y, crop_x2, crop_y2;
-	//cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
 	const uint8_t null_values[] = {255, 255, 255, 255};
 	//matrix_1ubyteMat_calculate_crop_old(&crop_x, &crop_x2, &crop_y, &crop_y2, img, height, width);
 	matrix_1ubyteMat_calculate_crop(&crop_x, &crop_x2, &crop_y, &crop_y2, img_data, height, width, 4, null_values);
+	
+	// calculate crop width & height
 	int crop_w = crop_x2 - crop_x + 1;
 	int crop_h = crop_y2 - crop_y + 1;
+
+	// select bigger size and use it as crop size
 	int max_size = max(crop_w, crop_h);
 	crop_x -= (max_size - crop_w) / 2;
 	crop_y -= (max_size - crop_h) / 2;
 
 	crop_w = crop_h = max_size;
 
+	// limit X coordinates to be inside border
 	if (crop_x + crop_w > width) crop_x -= crop_x + crop_w - width;
 	if (crop_x < 0) crop_x = 0;
 
+	// limit Y coordinates to be inside border
 	if (crop_y + crop_h > height) crop_y -= crop_y + crop_h - height;
 	if (crop_y < 0) crop_y = 0;
 
-	printf("Cropped size: %dx%d\n", crop_w, crop_h);
-	printf("Crop position: x=%d, y=%d\n", crop_x, crop_y);
+	dbg("Cropped size: %dx%d\n", crop_w, crop_h);
+	dbg("Crop position: x=%d, y=%d\n", crop_x, crop_y);
 
 
-	GBytes *img_bytes = g_bytes_new(img_data, width * height * 4);
-	//GBytes * img_bytes = g_bytes_new_from_bytes(img_data, 0, width*height*4);
-	GdkPixbuf *subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)), crop_x, crop_y, crop_w, crop_h);
-	//GdkPixbuf * pixbuf = gdk_pixbuf_new_from_bytes(cropped, GDK_COLORSPACE_RGB, false, 8, crop_cols, crop_rows, crop_cols*3);
-	//subpixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
-	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);
+	GBytes * img_bytes = g_bytes_new(img_data, width * height * 4);
+	pixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
+	subpixbuf = gdk_pixbuf_new_subpixbuf(pixbuf, crop_x, crop_y, crop_w, crop_h);
+	pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);
 	gui_display_image(pixbuf);
 
 	uint8_t *img = gdk_pixbuf_to_uint8_grayscale(pixbuf);
-	int rows, cols;
+	matrix_size_t rows, cols;
 
-	uint8_t *img2 = matrix_1ubyteMat_add_frame(&rows, &cols, img, 18, 18, 5, 5, 5, 5);
-	printf("new_size: %dx%d\n", rows, cols);
-	for (int row = 0; row < rows; row++) {
-		for (int col = 0; col < cols; col++) {
-			if (img2[row * cols + col] == 0)
-				printf(" ");
-			else
-				printf("█");
-		}
-		puts("");
-	}
+	uint8_t *img_final = matrix_1ubyteMat_add_frame(&rows, &cols, img, 18, 18, 5, 5, 5, 5);
+	free(img);
+
+	dbg("new_size: %dx%d\n", rows, cols);
+	dbgexec(ascii_display_grayscale_matrix(img_final, rows, cols));
+	
+
+
 	matrix_t *out_mat = matrix_new();
-	printf("RESULT: %d\n", nn_recognise(img2, out_mat));
-
+	nn_recognise(img_final, out_mat);
+	
 	uint8_t results[3];
 	double accuracies[3];
 
 	results[0] = matrix_argmax(out_mat);
 	accuracies[0] = matrix_max(out_mat);
 	*matrix_at_index(out_mat, results[0]) = -1;
-	//matrix_print_wh(out_mat, true);
 
 	results[1] = matrix_argmax(out_mat);
 	accuracies[1] = matrix_max(out_mat);
 	*matrix_at_index(out_mat, results[1]) = -1;
-	//matrix_print_wh(out_mat, true);
 
 	results[2] = matrix_argmax(out_mat);
 	accuracies[2] = matrix_max(out_mat);
 	*matrix_at_index(out_mat, results[2]) = -1;
-	//matrix_print_wh(out_mat, true);
+
+	dbg("RESULT: %d\n", results[0]);
 
 	gui_display_results(results, accuracies);
 
 	matrix_delete(out_mat);
 
-	free(img);
-	free(img2);
-	//free(cropped);
-
-	puts("");
-	
-	printf("stride: %d\n", cairo_image_surface_get_stride(surface));
-	printf("w x h: %dx%d\n", width, height);
-	printf("format: %d\n", format);
-
-	/*
-	cairo_pattern_t *pattern = cairo_pattern_create_for_surface (img_surface);
-	cairo_t * cr;
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_set_source_rgb (cr, 0, 0, 0);
-	cairo_set_operator (cr, CAIRO_OPERATOR_HSL_SATURATION);
-	cairo_mask (cr, pattern);
-	cairo_pattern_destroy (pattern);
-	*/
+	free(img_final);
+	dbgln("-------------------");
 }
 
 
 
 static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {	
-	GtkWidget *frame;
 	GtkWidget *drawing_area;
 	GtkWidget *button;
-	GtkWidget *button_box;
 	GtkWidget *vbox;
 	GtkTextIter iter;
 

@@ -5,10 +5,14 @@ Handwritten digits recognition in C using neural network trained using MNIST dat
  - `lag` - Linear Algebra library
  - `ceural` - C neural network library
 
-
-## Lag
+### Lag
 - `mat` - stands for matrix
 - `ew` - stands for element wise
+
+### Ceural
+
+## Performance
+Even though Python is much slower than C, Python-digit-recognition is much faster. The reason behind it is that Python version uses great library NumPy, which is written in C and uses BLAS implementation of matrix operations.
 
 ## ToDo
 - [ ] Cleanup & document `lag` library

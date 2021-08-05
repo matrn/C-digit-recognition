@@ -479,7 +479,7 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
 	nn_size = MSB_2bytes_to_int16(buf);
 
-	printf("nn size: %d\n", nn_size);
+	dbg("nn size: %d\n", nn_size);
 
 
 	for(int i = 0; i < nn_size; i ++){
@@ -495,7 +495,7 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 		if(fread(&buf, 1, 1, f) != 1) return MNIST_PARSE_ERROR;
 		int8_t activation_function = buf[0];
 
-		printf("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
+		dbg("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
 	}
 
 	// sizeof double
@@ -510,7 +510,7 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
 	double test_accuracy = MSB_2bytes_to_int16(buf)/100.0;
 
-	printf("Network was tested with accuracy: %.2f %%\n", test_accuracy);
+	dbg("Network was tested with accuracy: %.2f %%\n", test_accuracy);
 
 
 	for(int i = 0; i < nn_size; i ++){
@@ -555,10 +555,9 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 
 	if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
 	double euler = MSB_bytes_to_double(buf);
-	printf("Euler's number: %f\n", euler);
+	dbg("Euler's number: %f\n", euler);
 
 	if(fabs(EULER-euler) > 0.0001) dbgerrln("Something is wrong, I can feel it. e is incorrect");
-
 	
 	fclose(f);
 
