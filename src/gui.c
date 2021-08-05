@@ -122,15 +122,34 @@ static void close_window(void) {
 
 GtkTextBuffer *result_buffer;
 
-static void gui_set_result_number(const uint8_t number){
+static void gui_display_results(const uint8_t results[], const double accuracies[]){
 	GtkTextIter iter_start, iter_stop;
 
-	const char text[] = {number+'0', '\n', 0};
+	char text[200];
+	
 
 	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_start, 0);
-	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_stop, 1);
+	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_stop, 3+2);
 	gtk_text_buffer_delete(result_buffer, &iter_start, &iter_stop);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "big", "lmarg", NULL);
+
+	// 1. result
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, "1.Result: ", -1, "result_format", "top_result", NULL);
+	
+	sprintf(text, "%d", results[0]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", "green", NULL);
+	
+	sprintf(text, ", accuracy: %.2f %%\n", accuracies[0]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", NULL);
+
+
+	// 2. result
+	sprintf(text, "2.Result: %d, accuracy: %.2f %%\n", results[1], accuracies[1]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "second_result", NULL);
+	
+
+	// 3. result
+	sprintf(text, "3.Result: %d, accuracy: %.2f %%\n", results[2], accuracies[2]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "third_result", NULL);
 }
 
 static void recognise(GtkWidget *widget, gpointer data) {
@@ -200,10 +219,30 @@ static void recognise(GtkWidget *widget, gpointer data) {
 		}
 		puts("");
 	}
-	uint8_t result = nn_recognise(img2);
-	printf("RESULT: %d\n", result);
-	gui_set_result_number(result);
+	matrix_t *out_mat = matrix_new();
+	printf("RESULT: %d\n", nn_recognise(img2, out_mat));
 
+	uint8_t results[3];
+	double accuracies[3];
+
+	results[0] = matrix_argmax(out_mat);
+	accuracies[0] = matrix_max(out_mat);
+	*matrix_at_index(out_mat, results[0]) = -1;
+	//matrix_print_wh(out_mat, true);
+
+	results[1] = matrix_argmax(out_mat);
+	accuracies[1] = matrix_max(out_mat);
+	*matrix_at_index(out_mat, results[1]) = -1;
+	//matrix_print_wh(out_mat, true);
+
+	results[2] = matrix_argmax(out_mat);
+	accuracies[2] = matrix_max(out_mat);
+	*matrix_at_index(out_mat, results[2]) = -1;
+	//matrix_print_wh(out_mat, true);
+
+	gui_display_results(results, accuracies);
+
+	matrix_delete(out_mat);
 
 	free(img);
 	free(img2);
@@ -326,11 +365,14 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(result_view), FALSE);
 
 	result_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(result_view));
-
+	
 	//gtk_text_buffer_create_tag(buffer, "gap", "pixels_above_lines", 30, NULL);
 
-	gtk_text_buffer_create_tag(result_buffer, "lmarg", "left_margin", 10, NULL);
-	gtk_text_buffer_create_tag(result_buffer, "big", "scale", 1, NULL);
+	gtk_text_buffer_create_tag(result_buffer, "green", "foreground", "green", NULL);
+	gtk_text_buffer_create_tag(result_buffer, "result_format", "left_margin", 10, "right_margin", 10, NULL);
+	gtk_text_buffer_create_tag(result_buffer, "top_result", "font", "Monospace 15", NULL);
+	gtk_text_buffer_create_tag(result_buffer, "second_result", "font", "Monospace 10", NULL);
+	gtk_text_buffer_create_tag(result_buffer, "third_result", "font", "Monospace 10", NULL);
 	/*gtk_text_buffer_create_tag(result_buffer, "gray_bg", "background", "gray", NULL);
 	gtk_text_buffer_create_tag(result_buffer, "italic", "style", PANGO_STYLE_ITALIC, NULL);
 	gtk_text_buffer_create_tag(result_buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
@@ -348,7 +390,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Bold text\n", -1, "bold", "lmarg", NULL);
 	*/
 	gtk_text_buffer_get_iter_at_line(result_buffer, &iter, 0);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Draw something\n", -1, "big", "lmarg", NULL);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Draw a number\n", -1, "top_result", NULL);
 
 	/* Exit when the window is closed */
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);

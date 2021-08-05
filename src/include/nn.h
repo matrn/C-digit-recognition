@@ -22,7 +22,7 @@ ceural_net_t nn;
 void nn_init();
 void nn_train();
 double nn_test();
-int8_t nn_recognise(uint8_t * img);
+int8_t nn_recognise(uint8_t * img, matrix_t * result);
 void nn_free();
 
 #endif

@@ -72,8 +72,8 @@ double nn_test() {
 	return accuracy;
 }
 
-int8_t nn_recognise(uint8_t* img) {
-	matrix_t* out = matrix_new();  //calloc(10, sizeof(double));
+int8_t nn_recognise(uint8_t* img, matrix_t *out) {
+	//matrix_t* out = matrix_new();  //calloc(10, sizeof(double));
 
 	ceural_net_forward(&nn, out, img);
 	for (int i = 0; i < 10; i++) printf("%-8d", i);
@@ -81,7 +81,8 @@ int8_t nn_recognise(uint8_t* img) {
 	for (int i = 0; i < 10; i++) printf("%-8.3f", matrix_atv(out, i, 0));
 	printf("\n");
 	uint8_t result = matrix_argmax(out);
-	matrix_delete(out);
+	//*accuracy = matrix_max(out);
+	//matrix_delete(out);
 
 	return result;
 }
