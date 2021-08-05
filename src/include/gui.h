@@ -11,7 +11,7 @@
 #include "nn.h"
 
 #define GUI_MAIN_WINDOW_NAME "C digit recognition"
-#define GUI_OUT_WINDOW_NAME "Cropped"
+#define GUI_RESULT_WINDOW_NAME "Output"
 
 #define DRAW_WIDTH 20
 
@@ -24,6 +24,11 @@ static int surface_width = -1;
 static int surface_height = -1;
 
 static GtkWidget *image;
+
+
+GtkWidget *main_window, *result_window;
+GtkTextBuffer *result_buffer;
+
 
 int crecog_gui_setup(int argc, char **argv);
 

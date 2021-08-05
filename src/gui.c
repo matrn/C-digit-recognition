@@ -1,9 +1,53 @@
 #include "include/gui.h"
 
-void show_image(GdkPixbuf *data) {
+void gui_display_image(GdkPixbuf *data) {
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
 	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
 }
+
+static void gui_display_results(const uint8_t results[], const double accuracies[]){
+	GtkTextIter iter_start, iter_stop;
+
+	char text[200];
+	
+
+	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_start, 0);
+	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_stop, 3+2);
+	gtk_text_buffer_delete(result_buffer, &iter_start, &iter_stop);
+
+	// 1. result
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, "1.Result: ", -1, "result_format", "top_result", NULL);
+	
+	sprintf(text, "%d", results[0]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", "green", NULL);
+	
+	sprintf(text, ", accuracy: %.2f %%\n", accuracies[0]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", NULL);
+
+
+	// 2. result
+	sprintf(text, "2.Result: %d, accuracy: %.2f %%\n", results[1], accuracies[1]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "second_result", NULL);
+	
+
+	// 3. result
+	sprintf(text, "3.Result: %d, accuracy: %.2f %%\n", results[2], accuracies[2]);
+	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "third_result", NULL);
+}
+
+
+static void gui_close() {
+	if (surface) cairo_surface_destroy(surface);
+	surface = NULL;
+	nn_free();
+	
+	gtk_window_close(GTK_WINDOW(main_window));
+	gtk_window_close(GTK_WINDOW(result_window));
+	//gtk_main_quit();
+}
+
+
+
 
 uint8_t *gdk_pixbuf_to_uint8_grayscale(GdkPixbuf *pixbuf) {
 	int rows = gdk_pixbuf_get_height(pixbuf);
@@ -113,44 +157,10 @@ static gboolean motion_notify_event_cb(GtkWidget *widget, GdkEventMotion *event,
 	return TRUE;
 }
 
-static void close_window(void) {
-	if (surface) cairo_surface_destroy(surface);
-	gtk_main_quit();
-	nn_free();
-}
 
 
-GtkTextBuffer *result_buffer;
-
-static void gui_display_results(const uint8_t results[], const double accuracies[]){
-	GtkTextIter iter_start, iter_stop;
-
-	char text[200];
-	
-
-	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_start, 0);
-	gtk_text_buffer_get_iter_at_line(result_buffer, &iter_stop, 3+2);
-	gtk_text_buffer_delete(result_buffer, &iter_start, &iter_stop);
-
-	// 1. result
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, "1.Result: ", -1, "result_format", "top_result", NULL);
-	
-	sprintf(text, "%d", results[0]);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", "green", NULL);
-	
-	sprintf(text, ", accuracy: %.2f %%\n", accuracies[0]);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", NULL);
 
 
-	// 2. result
-	sprintf(text, "2.Result: %d, accuracy: %.2f %%\n", results[1], accuracies[1]);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "second_result", NULL);
-	
-
-	// 3. result
-	sprintf(text, "3.Result: %d, accuracy: %.2f %%\n", results[2], accuracies[2]);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "third_result", NULL);
-}
 
 static void recognise(GtkWidget *widget, gpointer data) {
 	g_print("Recognise\n");
@@ -164,7 +174,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	int width = cairo_image_surface_get_width(img_surface);
 	int height = cairo_image_surface_get_height(img_surface);
 
-	cairo_format_t format = cairo_image_surface_get_format(img_surface);
+	//cairo_format_t format = cairo_image_surface_get_format(img_surface);
 
 	int crop_x, crop_y, crop_x2, crop_y2;
 	//cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
@@ -203,7 +213,7 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	//GdkPixbuf * pixbuf = gdk_pixbuf_new_from_bytes(cropped, GDK_COLORSPACE_RGB, false, 8, crop_cols, crop_rows, crop_cols*3);
 	//subpixbuf = gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);
-	show_image(pixbuf);
+	gui_display_image(pixbuf);
 
 	uint8_t *img = gdk_pixbuf_to_uint8_grayscale(pixbuf);
 	int rows, cols;
@@ -296,27 +306,26 @@ static void recognise(GtkWidget *widget, gpointer data) {
 
 
 
-
-static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
-	GtkWidget *window;
+static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {	
 	GtkWidget *frame;
 	GtkWidget *drawing_area;
 	GtkWidget *button;
 	GtkWidget *button_box;
 	GtkWidget *vbox;
+	GtkTextIter iter;
 
 	nn_init();
 	//nn_test();
 
 	// main window setup
-	window = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(window), GUI_MAIN_WINDOW_NAME);
-	gtk_container_set_border_width(GTK_CONTAINER(window), 8);
-	g_signal_connect(window, "destroy", G_CALLBACK(close_window), NULL);
+	main_window = gtk_application_window_new(app);
+	gtk_window_set_title(GTK_WINDOW(main_window), GUI_MAIN_WINDOW_NAME);
+	gtk_container_set_border_width(GTK_CONTAINER(main_window), 8);
+	g_signal_connect(main_window, "destroy", G_CALLBACK(gui_close), NULL);
 
 	// vertical box
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-	gtk_container_add(GTK_CONTAINER(window), vbox);
+	gtk_container_add(GTK_CONTAINER(main_window), vbox);
 
 	// drawing area
 	drawing_area = gtk_drawing_area_new();
@@ -341,66 +350,49 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
      * button press and motion notify events that want to handle.
     */
 	gtk_widget_set_events(drawing_area, gtk_widget_get_events(drawing_area) | GDK_BUTTON_PRESS_MASK | GDK_POINTER_MOTION_MASK);
-	gtk_widget_show_all(window);
+	gtk_widget_show_all(main_window);
 	//gtk_window_get_position(GTK_WINDOW(window), &main_x, &main_y);
-	gtk_window_move(GTK_WINDOW(window), 300, 300);
+	gtk_window_move(GTK_WINDOW(main_window), 300, 300);
 
-	// window setup
-	window = gtk_application_window_new(app);
-	gtk_window_set_title(GTK_WINDOW(window), GUI_OUT_WINDOW_NAME);
+	// result window setup
+	result_window = gtk_application_window_new(app);
+	gtk_window_set_title(GTK_WINDOW(result_window), GUI_RESULT_WINDOW_NAME);
 
 	// vertical box
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
-	gtk_container_add(GTK_CONTAINER(window), vbox);
+	gtk_container_add(GTK_CONTAINER(result_window), vbox);
 
 	// cropped image widget
 	image = gtk_image_new();
 	gtk_widget_set_size_request(image, 200, 200);
 	gtk_box_pack_start(GTK_BOX(vbox), image, TRUE, TRUE, 0);
 
-	GtkTextIter iter, iter2;
 	GtkWidget *result_view = gtk_text_view_new();
 	gtk_box_pack_start(GTK_BOX(vbox), result_view, TRUE, TRUE, 0);
 	gtk_text_view_set_editable(GTK_TEXT_VIEW(result_view), FALSE);
 	gtk_text_view_set_cursor_visible(GTK_TEXT_VIEW(result_view), FALSE);
-
 	result_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(result_view));
 	
-	//gtk_text_buffer_create_tag(buffer, "gap", "pixels_above_lines", 30, NULL);
-
-	gtk_text_buffer_create_tag(result_buffer, "green", "foreground", "green", NULL);
+	gtk_text_buffer_create_tag(result_buffer, "green", "foreground", "green", "weight", PANGO_WEIGHT_BOLD, NULL);
 	gtk_text_buffer_create_tag(result_buffer, "result_format", "left_margin", 10, "right_margin", 10, NULL);
 	gtk_text_buffer_create_tag(result_buffer, "top_result", "font", "Monospace 15", NULL);
 	gtk_text_buffer_create_tag(result_buffer, "second_result", "font", "Monospace 10", NULL);
 	gtk_text_buffer_create_tag(result_buffer, "third_result", "font", "Monospace 10", NULL);
-	/*gtk_text_buffer_create_tag(result_buffer, "gray_bg", "background", "gray", NULL);
-	gtk_text_buffer_create_tag(result_buffer, "italic", "style", PANGO_STYLE_ITALIC, NULL);
-	gtk_text_buffer_create_tag(result_buffer, "bold", "weight", PANGO_WEIGHT_BOLD, NULL);
-	//gtk_text_buffer_create_mark(result_buffer, )
-	gtk_text_buffer_get_iter_at_line(result_buffer, &iter, 0);
 
-	//gtk_text_buffer_set_text(result_buffer, "nigga", 4);
-	//gtk_text_buffer_insert_with_tags()
-	
-	gtk_text_buffer_insert(result_buffer, &iter, "Plain text\n", -1);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Colored Text\n", -1, "blue_fg", "lmarg", NULL);
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Text with colored background\n", -1, "lmarg", "gray_bg", NULL);
-	
-	
-	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Bold text\n", -1, "bold", "lmarg", NULL);
-	*/
 	gtk_text_buffer_get_iter_at_line(result_buffer, &iter, 0);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Draw a number\n", -1, "top_result", NULL);
 
 	/* Exit when the window is closed */
-	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-	gtk_widget_show_all(window);
-	gtk_window_move(GTK_WINDOW(window), 800, 300);
+	g_signal_connect(result_window, "destroy", G_CALLBACK(gui_close), NULL);
+	gtk_widget_show_all(result_window);
+	gtk_window_move(GTK_WINDOW(result_window), 800, 300);
 }
+
 
 int crecog_gui_setup(int argc, char **argv) {
 	GtkApplication *app;
 	int status;
+
 	app = gtk_application_new("org.gtk.c-digit-recognition", G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(crecog_gui_activate), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);

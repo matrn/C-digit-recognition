@@ -88,5 +88,6 @@ int8_t nn_recognise(uint8_t* img, matrix_t *out) {
 }
 
 void nn_free() {
-	ceural_net_free(&nn);
+	if(nn.layers) ceural_net_free(&nn);
+	nn.layers = NULL;
 }
