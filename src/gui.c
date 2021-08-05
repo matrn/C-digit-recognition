@@ -1,5 +1,5 @@
 #include "include/gui.h"
-#include <assert.h>
+
 
 
 void show_image(GdkPixbuf *data) {
@@ -7,11 +7,7 @@ void show_image(GdkPixbuf *data) {
 	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
 }
 
-/*
-void show_1ubyte_image(uint8_t * img){
- gdk_pixbuf_new_from_bytes()
-}
-*/
+
 
 uint8_t * gdk_pixbuf_to_uint8_grayscale(GdkPixbuf * pixbuf){
 	int rows = gdk_pixbuf_get_height(pixbuf);
@@ -77,7 +73,7 @@ static gboolean draw_cb(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
-#define DRAW_WIDTH 20
+
 
 /* Draw a rectangle on the surface at the given position */
 static void draw_brush(GtkWidget *widget, gdouble x, gdouble y) {
@@ -258,15 +254,16 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	GtkWidget *button_box;
 	GtkWidget *vbox;
 
-	int main_x, main_y;
 
 	nn_init();
 	//nn_test();
 
+
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), GUI_MAIN_WINDOW_NAME);
-	g_signal_connect(window, "destroy", G_CALLBACK(close_window), NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(window), 8);
+	g_signal_connect(window, "destroy", G_CALLBACK(close_window), NULL);
+	
 
 	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
 	gtk_container_add(GTK_CONTAINER(window), vbox);
@@ -275,10 +272,9 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	//gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_IN);
 	//gtk_container_add(GTK_CONTAINER(window), frame);
 	drawing_area = gtk_drawing_area_new();
+	gtk_widget_set_size_request(drawing_area, 400, 400);   // set a minimum size
 	gtk_box_pack_start(GTK_BOX(vbox), drawing_area, TRUE, TRUE, 0);
 
-	/* set a minimum size */
-	gtk_widget_set_size_request(drawing_area, 400, 400);
 	
 	//gtk_container_add(GTK_CONTAINER(frame), drawing_area);
 
@@ -286,8 +282,8 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	//gtk_container_add(GTK_CONTAINER(window), button_box);
 
 	button = gtk_button_new_with_label("Recognise");
-	g_signal_connect(button, "clicked", G_CALLBACK(recognise), NULL);
 	gtk_box_pack_start(GTK_BOX(vbox), button, TRUE, TRUE, 0);
+	g_signal_connect(button, "clicked", G_CALLBACK(recognise), NULL);
 
 	/* Signals used to handle the backing surface */
 	g_signal_connect(drawing_area, "draw", G_CALLBACK(draw_cb), NULL);
@@ -305,27 +301,26 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	gtk_widget_show_all(window);
 	//gtk_window_get_position(GTK_WINDOW(window), &main_x, &main_y);
 	gtk_window_move(GTK_WINDOW(window), 300, 300);
-	//printf("X: %d, Y: %d\n", main_x, main_y);
-
-	GtkWidget *box;
+	
+	
 
 	/* Set up the UI */
 	window = gtk_application_window_new(app);
 	gtk_window_set_title(GTK_WINDOW(window), GUI_OUT_WINDOW_NAME);
 
-	box = gtk_box_new(GTK_ORIENTATION_VERTICAL, 5);
+	vbox = gtk_box_new(GTK_ORIENTATION_VERTICAL, 10);
+	gtk_container_add(GTK_CONTAINER(window), vbox);
+
 	image = gtk_image_new();
-
-	gtk_box_pack_start(GTK_BOX(box), image, TRUE, TRUE, 0);
-
-	gtk_container_add(GTK_CONTAINER(window), box);
-	gtk_widget_set_size_request(box, 200, 200);
-	gtk_window_move(GTK_WINDOW(window), 800, 300);
+	gtk_widget_set_size_request(image, 200, 200);
+	gtk_box_pack_start(GTK_BOX(vbox), image, TRUE, TRUE, 0);
 
 	/* Exit when the window is closed */
 	g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
 	gtk_widget_show_all(window);
+	gtk_window_move(GTK_WINDOW(window), 800, 300);
 }
+
 
 int crecog_gui_setup(int argc, char **argv) {
 	GtkApplication *app;
