@@ -1,8 +1,6 @@
 #include "include/ceural.h"
 
-
-
-int main(){
+int main() {
 	ceural_net_t nn;
 
 	ceural_layer_definition_t nn_layout[] = {
@@ -17,12 +15,10 @@ int main(){
 			.input_dim = 128,
 			.output_dim = 10,
 			.activation = ACTIVATION_SIGMOID,
-		}
-	};
+		}};
 	ceural_net_definition_t nn_def = {
 		.layers = 2,
-		.layout = nn_layout
-	};
+		.layout = nn_layout};
 
 	ceural_net_create(&nn, &nn_def);
 

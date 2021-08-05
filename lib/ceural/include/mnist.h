@@ -21,23 +21,23 @@ typedef struct MNISTLabels {
 	mnist_label_t* data;
 } mnist_labels_t;
 
-mnist_rtn mnist_labels_load(mnist_labels_t* labels, char* filename);
-void mnist_labels_free(mnist_labels_t* labels);
-
 typedef struct MNISTImages {
 	int32_t length;
 	int32_t rows, cols;
 	mnist_pixel_t** data;
 } mnist_images_t;
 
-mnist_rtn mnist_images_load(mnist_images_t* images, char* filename);
-void mnist_images_free(mnist_images_t* images);
-
 typedef struct MNISTSet {
 	mnist_images_t* images;
 	mnist_labels_t* labels;
 } mnist_set_t;
 
+mnist_rtn mnist_labels_load(mnist_labels_t* labels, char* filename);
+void mnist_labels_free(mnist_labels_t* labels);
+
 void mnist_label_vectorize(matrix_t* label_mat, mnist_label_t label);
+
+mnist_rtn mnist_images_load(mnist_images_t* images, char* filename);
+void mnist_images_free(mnist_images_t* images);
 
 #endif

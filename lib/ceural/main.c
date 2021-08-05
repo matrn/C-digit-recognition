@@ -1,6 +1,9 @@
 #include "include/ceural.h"
 
 
+/*
+ * Test example for ceural library
+ */
 
 int main(){
 	ceural_net_t nn;
@@ -42,7 +45,6 @@ int main(){
 	// printf("size: %ld\n", sizeof(train_images.data[0][1]));
 	// printf("data0: %d\n", train_images.data[0][0]);
 
-	
 	
 	mnist_set_t train_set = {
 		.images = &train_images,

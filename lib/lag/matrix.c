@@ -110,6 +110,26 @@ void matrix_zero(matrix_t* mat) {
 }
 
 /**
+ * @brief returns number of rows of the matrix
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
+matrix_size_t matrix_get_rows(matrix_t* mat) {
+	return mat->r;
+}
+
+/**
+ * @brief returns number of cols of the matrix
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
+matrix_size_t matrix_get_cols(matrix_t* mat) {
+	return mat->c;
+}
+
+/**
  * @brief returns pointer to the element at coordinates row x col
  * 
  * @param[in] mat 
@@ -615,26 +635,6 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t* out, matrix_t* a, uint8_t* b, ma
 }
 
 /**
- * @brief returns number of rows of the matrix
- * 
- * @param[in] mat 
- * @return matrix_size_t 
- */
-matrix_size_t matrix_get_rows(matrix_t* mat) {
-	return mat->r;
-}
-
-/**
- * @brief returns number of cols of the matrix
- * 
- * @param[in] mat 
- * @return matrix_size_t 
- */
-matrix_size_t matrix_get_cols(matrix_t* mat) {
-	return mat->c;
-}
-
-/**
  * @brief in-place matrix transposition
  * 
  * @param[out] dst 
@@ -853,7 +853,7 @@ uint8_t* matrix_1ubyteMat_crop_edges(matrix_size_t* out_rows, matrix_size_t* out
 	*out_rows = bottom_rows - top_rows + 1;
 	*out_cols = right_cols - left_cols + 1;
 	//printf("size: %ld\n", (*out_rows) * (*out_cols) * sizeof(uint8_t));
-	
+
 	out = (uint8_t*)malloc((*out_rows) * (*out_cols) * sizeof(uint8_t));
 	for (int row = top_rows; row <= bottom_rows; row++) {
 		for (int col = left_cols; col <= right_cols; col++) {

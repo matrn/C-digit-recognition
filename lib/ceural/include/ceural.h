@@ -50,22 +50,29 @@ typedef struct Ceuralnet {
 	ceural_layer_t *layers;
 } ceural_net_t;
 
-#define EULER 2.71828182845904523536
-
+// activation functions
 void ceural_relu(matrix_t *out, const matrix_t *z);
 void ceural_relu_derivative(matrix_t *out, const matrix_t *z);
 void ceural_sigmoid(matrix_t *out, const matrix_t *z);
 void ceural_sigmoid_derivative(matrix_t *out, const matrix_t *z);
 
+// create and destroy NN
 void ceural_net_create(ceural_net_t *nn, ceural_net_definition_t *nn_def);
 void ceural_net_free(ceural_net_t *nn);
+
+// classification
 void ceural_net_forward(ceural_net_t *nn, matrix_t *output, mnist_pixel_t *input);
-void ceural_net_reset_sums(ceural_net_t *nn);
+
+// train
 void ceural_net_backpropagate(ceural_net_t *nn, mnist_pixel_t *input, mnist_label_t expected_output);
+void ceural_net_reset_sums(ceural_net_t *nn);
 void ceural_net_update_weigts(ceural_net_t *nn, double learning_rate, uint16_t batch_size);
 void ceural_net_train(ceural_net_t *nn, mnist_set_t *train_set, uint16_t epochs, uint16_t batch_size);
+
+// test
 double ceural_net_test(ceural_net_t *nn, mnist_set_t *test_set);
 
+// save & load
 ceural_rtn ceural_net_save_to_file(ceural_net_t *nn, const char *filename, double test_accuracy);
 ceural_rtn ceural_net_load_from_file(ceural_net_t *nn, const char *filename);
 

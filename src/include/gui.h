@@ -14,8 +14,6 @@
 
 #define DRAW_SIZE 20  // width & height of brush rectangle
 
-
-
 GtkWidget *main_window, *result_window;
 GtkTextBuffer *result_buffer;
 

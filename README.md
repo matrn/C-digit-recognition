@@ -8,6 +8,7 @@ Handwritten digits recognition in C using neural network trained using MNIST dat
 ### Lag
 - `mat` - stands for matrix
 - `ew` - stands for element wise
+- Matrix part of the library automatically checks if destination and source is same where shouldn'ŧ be same and warns using `assert()`.
 
 ### Ceural
 
