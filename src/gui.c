@@ -168,13 +168,13 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	cairo_surface_flush(surface);
 	cairo_surface_t *img_surface = surface;	 //cairo_surface_create_similar_image(surface, cairo_surface_get_type(surface), surface_width, surface_height);
 
+	assert(cairo_image_surface_get_format(img_surface) == CAIRO_FORMAT_ARGB32);
+
 	//cairo_surface_t * img_surface = cairo_image_surface_create_for_data(img_surface_src, cairo_image_surface_get_format(img_surface_src), surface_width, surface_height, cairo_format_stride_for_width(img_surface_src));
 
 	unsigned char *img_data = cairo_image_surface_get_data(img_surface);
 	int width = cairo_image_surface_get_width(img_surface);
 	int height = cairo_image_surface_get_height(img_surface);
-
-	//cairo_format_t format = cairo_image_surface_get_format(img_surface);
 
 	int crop_x, crop_y, crop_x2, crop_y2;
 	//cropped = matrix_1ubyteMat_crop_edges(&crop_rows, &crop_cols, img, height, width);
@@ -197,16 +197,8 @@ static void recognise(GtkWidget *widget, gpointer data) {
 
 	printf("Cropped size: %dx%d\n", crop_w, crop_h);
 	printf("Crop position: x=%d, y=%d\n", crop_x, crop_y);
-	//printf("at 0: %d\n", cropped[0]);
-	//if(cropped == NULL) puts("NULLL");
-	//puts("ENDCROP");
-	/*
-	for(int row = 0; row < crop_rows; row ++){
-		for(int col = 0; col < crop_cols; col ++){
-			printf("%4d ", cropped[row*crop_cols+col]);
-		}
-		printf("\n");
-	}*/
+
+
 	GBytes *img_bytes = g_bytes_new(img_data, width * height * 4);
 	//GBytes * img_bytes = g_bytes_new_from_bytes(img_data, 0, width*height*4);
 	GdkPixbuf *subpixbuf = gdk_pixbuf_new_subpixbuf(gdk_pixbuf_new_from_bytes(img_bytes, GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface)), crop_x, crop_y, crop_w, crop_h);
@@ -264,35 +256,6 @@ static void recognise(GtkWidget *widget, gpointer data) {
 	printf("w x h: %dx%d\n", width, height);
 	printf("format: %d\n", format);
 
-	switch (format) {
-		case CAIRO_FORMAT_INVALID:
-			puts("CAIRO_FORMAT_INVALID");
-			break;
-
-		case CAIRO_FORMAT_ARGB32:
-			puts("CAIRO_FORMAT_ARGB32");
-			break;
-
-		case CAIRO_FORMAT_RGB24:
-			puts("CAIRO_FORMAT_RGB24");
-			break;
-
-		case CAIRO_FORMAT_A8:
-			puts("CAIRO_FORMAT_A8");
-			break;
-
-		case CAIRO_FORMAT_A1:
-			puts("CAIRO_FORMAT_A1");
-			break;
-
-		case CAIRO_FORMAT_RGB16_565:
-			puts("CAIRO_FORMAT_RGB16_565");
-			break;
-
-		case CAIRO_FORMAT_RGB30:
-			puts("CAIRO_FORMAT_RGB30");
-			break;
-	}
 	/*
 	cairo_pattern_t *pattern = cairo_pattern_create_for_surface (img_surface);
 	cairo_t * cr;
