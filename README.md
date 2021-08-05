@@ -18,8 +18,16 @@ Even though Python is much slower than C, Python-digit-recognition is much faste
 ## ToDo
 - [ ] Cleanup & document `lag` library
 - [ ] Cleanup & document `ceural` library
+- [ ] Cleanup & document `gui`
+- [ ] Add icons into `gui`
+- [ ] Create documentation
+- [ ] Write everything into README
+- [ ] Choose license
+- [ ] Finish top-level 'Makefile' to create final binary for linux
+- [ ] Create Windows compilation script & test it on Windows
+- [ ] Center digit by center of mass of the pixels before feeding it to the neural network from GUI input
 - [ ] Use BLAS (for example [OpenBLAS](https://github.com/xianyi/OpenBLAS)) library for linear algebra to improve speed
-- [ ] Look into possible performance improvements
+- [ ] Look into possible accuracy improvements
 
 ## Resources
 - [George Hotz's AI notebook](https://github.com/geohot/ai-notebooks/blob/master/mnist_from_scratch.ipynb)
