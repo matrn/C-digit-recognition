@@ -9,12 +9,32 @@
 
 #include "mnist.h"
 
-typedef int8_t ceural_rtn;
+
+#define CEURAL_VERIFY_NN_COMPATIBILITY	// used when loading weights & biases from file
+
+
 #define CEURAL_OK 0
 #define CEURAL_FILE_ERROR -1
 #define CEURAL_PARSE_ERROR -2
-#define CEURAL_FILE_DATA_ERROR -3   // used when neural network data file has different NN definition than passed NN
+#define CEURAL_FILE_DATA_ERROR -3  // used when neural network data file has different NN definition than passed NN
 
+
+#ifdef CEURAL_VERIFY_NN_COMPATIBILITY
+	#define CEURAL_NN_INCOMPATIBLE(msg)    \
+		{                                  \
+			dbgln(msg);                    \
+			return CEURAL_FILE_DATA_ERROR; \
+		}
+#else
+	#define CEURAL_NN_INCOMPATIBLE(msg)                           \
+		{                                                         \
+			dbgerrln("Ignoring neural networks incompatibility"); \
+			dbgln(msg);                                           \
+		}
+#endif
+
+
+typedef int8_t ceural_rtn;
 
 enum ceural_activation { ACTIVATION_RELU,
 						 ACTIVATION_SIGMOID };

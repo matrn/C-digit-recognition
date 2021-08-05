@@ -483,22 +483,22 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 
 	dbg("nn size: %d\n", nn_size);
 
-	// layers definitions
+	// layers definitions - verify neural network's compatibility
 	for(int i = 0; i < nn_size; i ++){
 		// input dim
 		if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint16_t input_dim = MSB_2bytes_to_int16(buf);
-		if(input_dim != matrix_get_cols(&nn->layers[i].weights)) return CEURAL_FILE_DATA_ERROR;
+		if(input_dim != matrix_get_cols(&nn->layers[i].weights)) CEURAL_NN_INCOMPATIBLE("Difference in input_dim");
 
 		// output dim
 		if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint16_t output_dim = MSB_2bytes_to_int16(buf);
-		if(output_dim != matrix_get_rows(&nn->layers[i].weights)) return CEURAL_FILE_DATA_ERROR;
+		if(output_dim != matrix_get_rows(&nn->layers[i].weights)) CEURAL_NN_INCOMPATIBLE("Difference in output_dim");
 
 		// activation function
 		if(fread(&buf, 1, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		int8_t activation_function = buf[0];
-		if(activation_function != nn->layers[i].activation_function_enum) return CEURAL_FILE_DATA_ERROR;
+		if(activation_function != nn->layers[i].activation_function_enum) CEURAL_NN_INCOMPATIBLE("Difference in activation_function");
 
 		dbg("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
 	}
