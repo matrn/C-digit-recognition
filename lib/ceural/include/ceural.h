@@ -13,6 +13,8 @@ typedef int8_t ceural_rtn;
 #define CEURAL_OK 0
 #define CEURAL_FILE_ERROR -1
 #define CEURAL_PARSE_ERROR -2
+#define CEURAL_FILE_DATA_ERROR -3   // used when neural network data file has different NN definition than passed NN
+
 
 enum ceural_activation { ACTIVATION_RELU,
 						 ACTIVATION_SIGMOID };

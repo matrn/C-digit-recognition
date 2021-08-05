@@ -8,7 +8,7 @@
  */
 void ceural_net_create(ceural_net_t * nn, ceural_net_definition_t * nn_def){
 	assert(nn_def->layers >= 2);
-	
+
 	nn->size = nn_def->layers;
 	nn->layers = (ceural_layer_t *)malloc(nn->size*sizeof(ceural_layer_t));
 
@@ -410,7 +410,7 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, dou
 	fwrite(&double_size, 1, 1, f);
 
 
-	// train accuracy
+	// test accuracy
 	int16_to_MSB_2bytes(buf, test_accuracy*100+0.5);
 	fwrite(buf, 2, 1, f);
 
@@ -474,88 +474,91 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	if(!f) return CEURAL_FILE_ERROR;
 
 	// magic number
-	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
-	if(MSB_2bytes_to_int16(buf) != 420) return MNIST_PARSE_ERROR;
+	if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
+	if(MSB_2bytes_to_int16(buf) != 420) return CEURAL_PARSE_ERROR;
 
 	// neural network number of layers
-	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+	if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 	nn_size = MSB_2bytes_to_int16(buf);
 
 	dbg("nn size: %d\n", nn_size);
 
-
+	// layers definitions
 	for(int i = 0; i < nn_size; i ++){
 		// input dim
-		if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint16_t input_dim = MSB_2bytes_to_int16(buf);
+		if(input_dim != matrix_get_cols(&nn->layers[i].weights)) return CEURAL_FILE_DATA_ERROR;
 
 		// output dim
-		if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint16_t output_dim = MSB_2bytes_to_int16(buf);
+		if(output_dim != matrix_get_rows(&nn->layers[i].weights)) return CEURAL_FILE_DATA_ERROR;
 
 		// activation function
-		if(fread(&buf, 1, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 1, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		int8_t activation_function = buf[0];
+		if(activation_function != nn->layers[i].activation_function_enum) return CEURAL_FILE_DATA_ERROR;
 
 		dbg("in_dim: %d, out_dim: %d, activation: %d\n", input_dim, output_dim, activation_function);
 	}
 
 	// sizeof double
-	if(fread(&buf, 1, 1, f) != 1) return MNIST_PARSE_ERROR;
+	if(fread(&buf, 1, 1, f) != 1) return CEURAL_PARSE_ERROR;
 	int8_t double_size = buf[0];
 	if(double_size != sizeof(MATRIX_TYPE)){
 		dbgerr("Different double sizes, unable to parse");
-		return MNIST_PARSE_ERROR;
+		return CEURAL_PARSE_ERROR;
 	}
 
 	// train accuracy
-	if(fread(&buf, 2, 1, f) != 1) return MNIST_PARSE_ERROR;
+	if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
 	double test_accuracy = MSB_2bytes_to_int16(buf)/100.0;
 
 	dbg("Network was tested with accuracy: %.2f %%\n", test_accuracy);
 
-
+	// weights and biases
 	for(int i = 0; i < nn_size; i ++){
 		ceural_layer_t * layer = &nn->layers[i];
 
 		/* weights */
 		// rows
-		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 4, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint32_t rows = MSB_4bytes_to_int32(buf);
 	
 		// cols
-		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 4, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		uint32_t cols = MSB_4bytes_to_int32(buf);
 
 		//printf("Matrix: %dx%d\n", rows, cols);
-		if(rows != layer->weights.r) return MNIST_PARSE_ERROR;
-		if(cols != layer->weights.c) return MNIST_PARSE_ERROR;
+		if(rows != layer->weights.r) return CEURAL_PARSE_ERROR;
+		if(cols != layer->weights.c) return CEURAL_PARSE_ERROR;
 
 		for(int i = 0; i < rows*cols; i ++){
-			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return CEURAL_PARSE_ERROR;
 			layer->weights.data[i] = MSB_bytes_to_double(buf);
 		}
 		
 		/* bias */
 		// rows
-		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 4, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		rows = MSB_4bytes_to_int32(buf);
 		
 		// cols
-		if(fread(&buf, 4, 1, f) != 1) return MNIST_PARSE_ERROR;
+		if(fread(&buf, 4, 1, f) != 1) return CEURAL_PARSE_ERROR;
 		cols = MSB_4bytes_to_int32(buf);
 
 		//printf("Matrix: %dx%d\n", rows, cols);
-		if(rows != layer->bias.r) return MNIST_PARSE_ERROR;
-		if(cols != layer->bias.c) return MNIST_PARSE_ERROR;
+		if(rows != layer->bias.r) return CEURAL_PARSE_ERROR;
+		if(cols != layer->bias.c) return CEURAL_PARSE_ERROR;
 
 		for(int i = 0; i < rows*cols; i ++){
-			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+			if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return CEURAL_PARSE_ERROR;
 			layer->bias.data[i] = MSB_bytes_to_double(buf);
 		}
 	}
 
-	if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return MNIST_PARSE_ERROR;
+	if(fread(&buf, DOUBLE_SIZE, 1, f) != 1) return CEURAL_PARSE_ERROR;
 	double euler = MSB_bytes_to_double(buf);
 	dbg("Euler's number: %f\n", euler);
 
