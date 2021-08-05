@@ -5,10 +5,10 @@ lag.o: matrix.c
 	echo "lag.o"
 	${CC} ${CFLAGS} -o ../../obj/$@ -c $^ ${LDFLAGS}
 
-lag.so: matrix.c debug.c
+lag.so: lag.c matrix.c debug.c
 	${CC} ${CFLAGS} -fPIC -shared -o ../../obj/lib$@ $^ ${LDFLAGS}
 
-matrix: matrix_test.c matrix.c debug.c
+matrix: matrix_test.c lag.c matrix.c debug.c
 	${CC} ${CFLAGS} -o $@ $^ ${LDFLAGS}
 
 
@@ -17,4 +17,5 @@ matrix_test: matrix
 
 clean:
 	rm -f matrix
-	rm -f ../../obj/lag.so
+	rm -f ../../obj/lag.o
+	rm -f ../../obj/liblag.so

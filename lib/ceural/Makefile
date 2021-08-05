@@ -29,4 +29,4 @@ activations_test: activations_test.c activations.c ../lag/debug.c ../../obj/lag.
 clean:
 	rm -f activations_test
 	rm -f ceural
-	rm -f ../../obj/ceural.so
+	rm -f ../../obj/libceural.so

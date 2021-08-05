@@ -1,6 +1,10 @@
 #ifndef DEBUG_H
 #define DEBUG_H
 
+#include <stdio.h>
+#include <time.h>
+
+
 #ifdef DEBUG
 	#define dbg(fmt, ...) printf(fmt, __VA_ARGS__)
 	#define dbgln(str) puts(str)
@@ -20,11 +24,8 @@
 #endif
 
 
-
 //#define TM_DEBUG
 
-#include <stdio.h>
-#include <time.h>
 typedef clock_t dbg_tm;
 
 dbg_tm get_dbg_tm();
