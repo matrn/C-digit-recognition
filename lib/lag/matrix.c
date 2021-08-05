@@ -185,7 +185,14 @@ matrix_rtn matrix_eye(matrix_t* mat) {
 
 
 
-
+/**
+ * @brief out = a + b
+ * 
+ * @param[out] out pointer to the output matrix
+ * @param[in] a pointer to the first input matrix
+ * @param[in] b pointer to the second input matrix
+ * @return matrix_rtn returns MATRIX_OK if ok, otherwise MATRIX_WRONG_SIZE
+ */
 matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b) {
 	if (a->r != b->r || a->c != b->c) {
 		dbgerrln("Different matrices sizes");
@@ -203,6 +210,14 @@ matrix_rtn matrix_add(matrix_t* out, const matrix_t* a, const matrix_t* b) {
 	return MATRIX_OK;
 }
 
+/**
+ * @brief out = a - b
+ * 
+ * @param[out] out 
+ * @param[in] a 
+ * @param[in] b 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b) {
 	if (a->r != b->r || a->c != b->c) {
 		dbgerrln("Different matrices sizes");
@@ -221,8 +236,18 @@ matrix_rtn matrix_sub(matrix_t* out, const matrix_t* a, const matrix_t* b) {
 }
 
 
-
+/**
+ * @brief out = a*b, classical matrix multiplication
+ * 
+ * @param[out] out 
+ * @param[in] a 
+ * @param[in] b 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) {
+	assert(out != a);
+	assert(out != b);
+
 	if (a->c != b->r) {
 		dbgerrln("Wrong matrices sizes");
 		return MATRIX_WRONG_SIZE;
@@ -236,7 +261,6 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 			for(int r = 0; r < b->r; r ++){
 				sum += matrix_atv(a, row, r)*matrix_atv(b, r, col);
 			}
-			//printf("%f\n", sum);
 			*matrix_at(out, row, col) = sum;
 		}
 	}
@@ -244,7 +268,14 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 	return MATRIX_OK;
 }
 
-
+/**
+ * @brief element wise matrix multiplication
+ * 
+ * @param[out] out 
+ * @param[in] a 
+ * @param[in] b 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_multiply_ew(matrix_t* out, const matrix_t* a, const matrix_t* b) {
 	if (a->r != b->r || a->c != b->c) {
 		dbgerrln("Different matrices sizes");
@@ -262,7 +293,12 @@ matrix_rtn matrix_multiply_ew(matrix_t* out, const matrix_t* a, const matrix_t* 
 	return MATRIX_OK;
 }
 
-
+/**
+ * @brief returns maximum value from the matrix
+ * 
+ * @param[in] mat 
+ * @return MATRIX_TYPE 
+ */
 MATRIX_TYPE matrix_max(matrix_t * mat){
 	MATRIX_TYPE max_val = mat->data[0];
 	for(int i = 1; i < mat->r*mat->c; i ++){
@@ -271,9 +307,16 @@ MATRIX_TYPE matrix_max(matrix_t * mat){
 	return max_val;
 }
 
+/**
+ * @brief returns index of the maximum element
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
 matrix_size_t matrix_argmax(matrix_t * mat){
 	MATRIX_TYPE max_val = mat->data[0];
 	matrix_size_t max_val_index = 0;
+
 	for(int i = 1; i < mat->r*mat->c; i ++){
 		if(mat->data[i] > max_val){
 			max_val = mat->data[i];
@@ -284,7 +327,12 @@ matrix_size_t matrix_argmax(matrix_t * mat){
 }
 
 
-
+/**
+ * @brief returns minimum value from the matrix
+ * 
+ * @param[in] mat 
+ * @return MATRIX_TYPE 
+ */
 MATRIX_TYPE matrix_min(matrix_t * mat){
 	MATRIX_TYPE min_val = mat->data[0];
 	for(int i = 1; i < mat->r*mat->c; i ++){
@@ -293,9 +341,16 @@ MATRIX_TYPE matrix_min(matrix_t * mat){
 	return min_val;
 }
 
+/**
+ * @brief returns index of the minimum element
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
 matrix_size_t matrix_argmin(matrix_t * mat){
 	MATRIX_TYPE min_val = mat->data[0];
 	matrix_size_t min_val_index = 0;
+
 	for(int i = 1; i < mat->r*mat->c; i ++){
 		if(mat->data[i] < min_val){
 			min_val = mat->data[i];
@@ -306,7 +361,14 @@ matrix_size_t matrix_argmin(matrix_t * mat){
 }
 
 
-
+/**
+ * @brief element wise operation where value of each position = max(value of the element, value)
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] value 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_maximum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -317,6 +379,14 @@ matrix_rtn matrix_maximum(matrix_t * out, const matrix_t * mat, const MATRIX_TYP
 }
 
 
+/**
+ * @brief element wise operation where value of each position = min(value of the element, value)
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] value 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_minimum(matrix_t * out, const matrix_t * mat, const MATRIX_TYPE value){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -327,9 +397,14 @@ matrix_rtn matrix_minimum(matrix_t * out, const matrix_t * mat, const MATRIX_TYP
 }
 
 
-
-
-
+/**
+ * @brief element wise matrix division
+ * 
+ * @param[out] out 
+ * @param[in] a 
+ * @param[in] b 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_divide_ew(matrix_t * out, matrix_t* a, matrix_t* b){
 	if (a->r != b->r || a->c != b->c) {
 		dbgerrln("Different matrices sizes");
@@ -339,11 +414,19 @@ matrix_rtn matrix_divide_ew(matrix_t * out, matrix_t* a, matrix_t* b){
 	matrix_resize(out, a->r, a->c);
 
 	for(int i = 0; i < a->r*a->c; i ++){
-		out->data[i] = a->data[i]*b->data[i];
+		out->data[i] = a->data[i]/b->data[i];
 	}
 	return MATRIX_OK;
 }
 
+/**
+ * @brief element wise: out = scalar/mat
+ * 
+ * @param[out] out 
+ * @param[in] scalar 
+ * @param[in] mat 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_divide_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * mat){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -353,19 +436,30 @@ matrix_rtn matrix_divide_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * 
 	return MATRIX_OK;
 }
 
-
+/**
+ * @brief element wise: out = mat/scalar
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] scalar 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_divide_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE scalar){
 	matrix_resize(out, mat->r, mat->c);
 
 	for(int i = 0; i < mat->r*mat->c; i ++){
 		out->data[i] = mat->data[i]/scalar;
-		//printf("%f\n", out->data[i]);
 	}
 	return MATRIX_OK;
 }
 
-
-
+/**
+ * @brief element wise exponential of the matrix
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_exp_ew(matrix_t * out, matrix_t* mat){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -375,7 +469,14 @@ matrix_rtn matrix_exp_ew(matrix_t * out, matrix_t* mat){
 	return MATRIX_OK;
 }
 
-
+/**
+ * @brief multiplies each element of the matrix by scalar value
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] scalar 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_scale(matrix_t *out, const matrix_t * mat, const MATRIX_TYPE scalar){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -386,6 +487,14 @@ matrix_rtn matrix_scale(matrix_t *out, const matrix_t * mat, const MATRIX_TYPE s
 	return MATRIX_OK;
 }
 
+/**
+ * @brief appends scalar to each element of the matrix
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] scalar 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_add_scalar(matrix_t * out, const matrix_t * mat, MATRIX_TYPE scalar){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -396,6 +505,14 @@ matrix_rtn matrix_add_scalar(matrix_t * out, const matrix_t * mat, MATRIX_TYPE s
 	return MATRIX_OK;
 }
 
+/**
+ * @brief element wise substract of scalar-mat
+ * 
+ * @param[out] out 
+ * @param[in] scalar 
+ * @param[in] mat 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_sub_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * mat){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -406,6 +523,14 @@ matrix_rtn matrix_sub_lscalar(matrix_t * out, MATRIX_TYPE scalar, matrix_t * mat
 	return MATRIX_OK;
 }
 
+/**
+ * @brief element wise substract of mat-scalar
+ * 
+ * @param[out] out 
+ * @param[in] mat 
+ * @param[in] scalar 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_sub_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE scalar){
 	matrix_resize(out, mat->r, mat->c);
 
@@ -416,12 +541,25 @@ matrix_rtn matrix_sub_rscalar(matrix_t * out, matrix_t * mat, MATRIX_TYPE scalar
 	return MATRIX_OK;
 }
 
-
+/**
+ * @brief sets the random seed for the random function
+ * 
+ * @param[in] seed 
+ */
 void random_seed(unsigned int seed){
 	srand(seed);
 }
 
-
+/**
+ * @brief generates random floating point value for each element of the out matrix in the range [min_val, max_val]
+ * 
+ * @param[out] out 
+ * @param[in] min_val 
+ * @param[in] max_val 
+ * @return matrix_rtn 
+ * 
+ * @warning note that rand() function is not secure for security purposes
+ */
 matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val){
 	// note that rand() function is not secure for security purposes
 
@@ -432,23 +570,25 @@ matrix_rtn matrix_random_uniform(matrix_t * out, double min_val, double max_val)
 	return MATRIX_OK;
 }
 
-
-
-
-
+/**
+ * @brief matrix multiplication with uint8_t array matrix on the right size
+ * 
+ * @param[out] out 
+ * @param[in] a 
+ * @param[in] b 
+ * @param[in] rows 
+ * @param[in] cols 
+ * @return matrix_rtn 
+ */
 matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b, matrix_size_t rows, matrix_size_t cols){
+	assert(out != a);
+
 	if (a->c != rows) {
 		dbgerrln("Wrong matrices sizes");
 		return MATRIX_WRONG_SIZE;
 	}
 
-	//matrix_print_wh(out, true);
-	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
-	cstart(matrix_resize);
 	matrix_resize(out, a->r, cols);
-	cstop(matrix_resize);
-	//printf("out size: %dx%d\n", matrix_get_rows(out), matrix_get_cols(out));
-	
 
 	for (int row = 0; row < a->r; row ++) {
 		for (int col = 0; col < cols; col ++) {
@@ -469,17 +609,33 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t * out, matrix_t * a, uint8_t * b,
 }
 
 
-
-
+/**
+ * @brief returns number of rows of the matrix
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
 matrix_size_t matrix_get_rows(matrix_t * mat){
 	return mat->r;
 }
+
+/**
+ * @brief returns number of cols of the matrix
+ * 
+ * @param[in] mat 
+ * @return matrix_size_t 
+ */
 matrix_size_t matrix_get_cols(matrix_t * mat){
 	return mat->c;
 }
 
 
-
+/**
+ * @brief in-place matrix transposition
+ * 
+ * @param[out] dst 
+ * @param[in] src 
+ */
 void matrix_transpose(matrix_t * dst, matrix_t * src){ //double m[], const unsigned h, const unsigned w){
 	if(src->r == 1 || src->c == 1){
 		if(dst == src){
