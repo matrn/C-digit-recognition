@@ -27,6 +27,12 @@ typedef struct Matrix {
 	MATRIX_TYPE* data;
 } matrix_t;
 
+enum Axis {
+	ROW_AXIS = 0,   // 0th axis
+	COL_AXIS = 1,   // 1st axis
+	X_AXIS = 1,
+	Y_AXIS = 0,
+};
 
 matrix_t * matrix_new();
 void matrix_init(matrix_t *mat);
@@ -44,6 +50,8 @@ matrix_size_t matrix_get_cols(matrix_t * mat);
 MATRIX_TYPE* matrix_at(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
 MATRIX_TYPE matrix_atv(const matrix_t* mat, const matrix_size_t row, const matrix_size_t col);
 MATRIX_TYPE* matrix_at_index(const matrix_t* mat, const matrix_size_t index);
+//uint8_t* matrix_1ubyteMat_at(const uint8_t * mat, const matrix_size_t row, const matrix_size_t col);
+//uint8_t matrix_1ubyteMat_atv(const uint8_t * mat, const matrix_size_t row, const matrix_size_t col);
 
 void matrix_print(const matrix_t* mat);
 void matrix_print_wh(const matrix_t* mat, bool header);  // with header
@@ -87,5 +95,10 @@ void matrix_1ubyteMat_calculate_crop_old(int * width_start, int * width_stop, in
 uint8_t * matrix_1ubyteMat_crop_edges(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols);
 uint8_t * matrix_1ubyteMat_add_frame(matrix_size_t * out_rows, matrix_size_t * out_cols, uint8_t * mat, matrix_size_t rows, matrix_size_t cols, matrix_size_t top_rows, matrix_size_t bottom_rows, matrix_size_t left_cols, matrix_size_t right_cols);
 void matrix_1ubyteMat_display(const uint8_t *img, const int rows, const int cols);
+void matrix_1ubyteMat_print(const uint8_t *img, const int rows, const int cols);
+
+matrix_size_t matrix_1ubyteMat_mean(const uint8_t * mat, const matrix_size_t rows, const matrix_size_t cols, enum Axis axis);
+void matrix_1ubyteMat_submat_move(uint8_t * mat, const matrix_size_t rows, const matrix_size_t cols, const matrix_size_t submat_rows, const matrix_size_t submat_cols, matrix_size_t submat_pos_row, matrix_size_t submat_pos_col, int drows, int dcols);
+
 
 #endif

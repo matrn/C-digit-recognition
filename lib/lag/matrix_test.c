@@ -36,5 +36,26 @@ int main(){
 	//matrix_free(&mat);
 	matrix_free(&out);
 
+	puts("---------------------SubMat move---------------------");
+	{
+	uint8_t mat[] = {
+		6, 0, 8, 0, 0, 1,
+		0, 9, 0, 7, 2, 0,
+		4, 0, 55, 54, 0, 3,
+		0, 3, 53, 52, 4, 0,
+		2, 0, 3, 0, 0, 9,
+		0, 1, 0, 4, 6, 0,
+	};
+
+	int rows = 6;
+	int cols = 6;
+
+	matrix_1ubyteMat_print(mat, rows, cols);
+	puts("-----------------");
+	matrix_1ubyteMat_submat_move(mat, rows, cols, 2, 2, 2, 2, -2, -1);
+	matrix_1ubyteMat_print(mat, rows, cols);
+
+	}
+	
 	return 0;
 }

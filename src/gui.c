@@ -132,11 +132,24 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 
 	img = gdk_pixbuf_to_uint8_grayscale(pixbuf);  // convert image to the grayscale img
 
+	matrix_1ubyteMat_display(img, 18, 18);
+	int row_center = matrix_1ubyteMat_mean(img, 18, 18, ROW_AXIS);
+	int col_center = matrix_1ubyteMat_mean(img, 18, 18, COL_AXIS);
+	printf("Center: %dx%d\n", row_center, col_center);
+
 	img_final = matrix_1ubyteMat_add_frame(&img_final_rows, &img_final_cols, img, 18, 18, 5, 5, 5, 5);
 	free(img);
 
+	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
+	puts("---------------------------");
+	matrix_1ubyteMat_submat_move(img_final, img_final_rows, img_final_cols, 18, 18, 5, 5, row_center-9, col_center-9);
+	puts("---------------------------");
+	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
+	
+	puts("Move done");
 	dbg("new_size: %dx%d\n", img_final_rows, img_final_cols);
 	dbgexec(matrix_1ubyteMat_display(img_final, img_final_rows, img_final_cols));
+	
 
 	out_mat = matrix_new();
 	nn_recognise(img_final, out_mat);

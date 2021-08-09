@@ -908,6 +908,140 @@ void matrix_1ubyteMat_display(const uint8_t* img, const int rows, const int cols
 			else
 				printf("█");
 		}
-		puts("");
+		printf("\n");
 	}
+}
+
+/**
+ * @brief print uint8_t matrix
+ * 
+ * @param[in] img pointer to the data array
+ * @param[in] rows
+ * @param[in] cols 
+ */
+void matrix_1ubyteMat_print(const uint8_t* img, const int rows, const int cols) {
+	for (int row = 0; row < rows; row++) {
+		for (int col = 0; col < cols; col++) {
+			printf("%4d ", img[row * cols + col]);
+		}
+		printf("\n");
+	}
+}
+
+
+/**
+ * @brief calculates mean value across specified axis. Used for calculation center of the pixel mass
+ * 
+ * @param mat pointer to the data array
+ * @param rows 
+ * @param cols 
+ * @param axis axis enum: ROW_AXIS/COL_AXIS or Y_AXIS/X_AXIS
+ * @return matrix_size_t returns rounded coordinate
+ */
+matrix_size_t matrix_1ubyteMat_mean(const uint8_t* mat, const matrix_size_t rows, const matrix_size_t cols, enum Axis axis) {
+	// see: https://www.researchgate.net/figure/Example-of-calculation-of-the-centre-of-mass-of-an-image-a-The-original-square-image_fig2_233397383
+
+	int m_sum = 0;
+	int mr_sum = 0;
+	switch (axis) {
+		case ROW_AXIS:
+			for (int row = 0; row < rows; row++) {
+				int m = 0;
+				for (int col = 0; col < cols; col++) {
+					m += mat[row * cols + col];
+				}
+				m_sum += m;
+				mr_sum += m * (row + 1);
+			}
+			break;
+
+		case COL_AXIS:
+			for (int col = 0; col < cols; col++) {
+				int m = 0;
+				for (int row = 0; row < rows; row++) {
+					m += mat[row * cols + col];
+				}
+				m_sum += m;
+				mr_sum += m * (col + 1);
+			}
+			break;
+	}
+
+	printf("m_sum: %d\n", m_sum);
+	printf("mr_sum: %d\n", mr_sum);
+	return round((double)mr_sum / m_sum);
+}
+
+/**
+ * @brief 
+ * 
+ * @param mat 
+ * @param rows 
+ * @param cols 
+ * @param submat_rows number of rows of the sub matrix
+ * @param submat_cols number of cols of the sub matrix
+ * @param submat_pos_row [0,0] position of the submatrix in the matrix
+ * @param submat_pos_col [0,0] position of the submatrix in the matrix
+ * @param drows number of rows to move
+ * @param dcols number of cols to move
+ */
+void matrix_1ubyteMat_submat_move(uint8_t * mat, const matrix_size_t rows, const matrix_size_t cols, const matrix_size_t submat_rows, const matrix_size_t submat_cols, matrix_size_t submat_pos_row, matrix_size_t submat_pos_col, int drows, int dcols){
+	/* rows */
+	if(drows > 0){
+		dbgln("row up");
+		// move up
+		if(drows > submat_pos_row) drows = submat_pos_row;
+		//memmove(&mat[(submat_pos_row-drows)*cols], &mat[(submat_pos_row)*cols], drows*cols*sizeof(uint8_t));
+		//memset(&mat[(submat_pos_row+submat_rows-drows)*cols], 0, drows*cols*sizeof(uint8_t));
+		for(int r = 0; r < submat_cols; r ++){
+			memcpy(&mat[(r+submat_pos_row-drows)*cols+submat_pos_col], &mat[(r+submat_pos_row)*cols+submat_pos_col], submat_cols*sizeof(uint8_t));
+		}
+		for(int r = 0; r < drows; r ++){
+			memset(&mat[(r+submat_pos_row+submat_rows-drows)*cols+submat_pos_col], 0, submat_cols*sizeof(uint8_t));
+		}
+
+		submat_pos_row -= drows;
+	}
+
+	else if(drows < 0){
+		dbgln("row down");
+		// move down
+		int drows_abs = abs(drows);
+		if(drows_abs > rows-submat_pos_row-submat_rows) drows_abs = rows-submat_pos_row-submat_rows;
+		//memmove(&mat[(submat_pos_row+drows)*cols], &mat[(submat_pos_row)*cols], submat_rows*cols*sizeof(uint8_t));
+		//memset(&mat[(submat_pos_row)*cols], 0, drows_abs*cols*sizeof(uint8_t));
+
+		for(int r = submat_rows-1; r >= 0; r --){
+			memcpy(&mat[(r+submat_pos_row+drows_abs)*cols+submat_pos_col], &mat[(r+submat_pos_row)*cols+submat_pos_col], submat_cols*sizeof(uint8_t));
+		}
+		for(int r = 0; r < drows_abs; r ++){
+			memset(&mat[(r+submat_pos_row)*cols+submat_pos_col], 0, submat_cols*sizeof(uint8_t));
+		}
+
+		submat_pos_row += drows_abs;
+	}
+
+	/* cols */
+	if(dcols > 0){
+		dbgln("col right");
+		// move right
+		if(dcols > cols-submat_pos_col-submat_cols) dcols = cols-submat_pos_col-submat_cols;
+
+		for(int r = 0; r < submat_rows; r ++){
+			memmove(&mat[(submat_pos_row+r)*cols+submat_pos_col+dcols], &mat[(submat_pos_row+r)*cols+submat_pos_col], submat_cols*sizeof(uint8_t));
+			memset(&mat[(submat_pos_row+r)*cols+submat_pos_col], 0, dcols*sizeof(uint8_t));
+		}
+	}
+	else if(dcols < 0){
+		dbgln("col left");
+		// move left
+		int dcols_abs = abs(dcols);
+		if(dcols_abs > submat_pos_col) dcols_abs = submat_pos_col;
+
+		for(int r = 0; r < submat_rows; r ++){
+			memmove(&mat[(submat_pos_row+r)*cols+submat_pos_col-dcols_abs], &mat[(submat_pos_row+r)*cols+submat_pos_col], submat_cols*sizeof(uint8_t));
+			memset(&mat[(submat_pos_row+r)*cols+submat_pos_col+submat_cols-dcols_abs], 0, dcols_abs*sizeof(uint8_t));
+		}
+	}
+
 }
