@@ -12,7 +12,6 @@ static int surface_height = -1;
 
 static GtkWidget *image;
 
-
 void gui_display_image(GdkPixbuf *data) {
 	GdkPixbuf *pixbuf = gdk_pixbuf_scale_simple(data, 250, 250, GDK_INTERP_BILINEAR);
 	gtk_image_set_from_pixbuf((GtkImage *)image, pixbuf);
@@ -80,6 +79,20 @@ uint8_t *gdk_pixbuf_to_uint8_grayscale(GdkPixbuf *pixbuf) {
 	return img_out;
 }
 
+GdkPixbuf *uint8_grayscale_to_gdk_pixbuf(const uint8_t *in_img, const int rows, const int cols) {
+	uint8_t *rgb_img = malloc(rows * cols * 3);
+	int index = 0;
+	for (int i = 0; i < rows * cols; i++) {
+		rgb_img[index++] = 255 - in_img[i];	 // R
+		rgb_img[index++] = 255 - in_img[i];	 // G
+		rgb_img[index++] = 255 - in_img[i];	 // B
+	}
+
+	GdkPixbuf *out_pixbuf = gdk_pixbuf_new_from_bytes(g_bytes_new(rgb_img, rows * cols * 3), GDK_COLORSPACE_RGB, false, 8, cols, rows, cols * 3);
+	free(rgb_img);
+
+	return out_pixbuf;
+}
 
 /* recognise input image and display results */
 static void recognise_input(GtkWidget *widget, gpointer data) {
@@ -127,29 +140,30 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 
 	pixbuf = gdk_pixbuf_new_from_bytes(g_bytes_new(img_data, width * height * 4), GDK_COLORSPACE_RGB, true, 8, width, height, cairo_image_surface_get_stride(surface));	 // create pixbuf from cairo surface
 	subpixbuf = gdk_pixbuf_new_subpixbuf(pixbuf, crop_x, crop_y, crop_w, crop_h);																						 // crop pixbuf using calculated coordinates
-	pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 18, 18, GDK_INTERP_BILINEAR);																							 // scale cropped pixbuf using bilinear interpolation
-	gui_display_image(pixbuf);																																			 // show cropped & scaled image in result window
+	pixbuf = gdk_pixbuf_scale_simple(subpixbuf, 20, 20, GDK_INTERP_BILINEAR);																							 // scale cropped pixbuf using bilinear interpolation
 
 	img = gdk_pixbuf_to_uint8_grayscale(pixbuf);  // convert image to the grayscale img
 
-	matrix_1ubyteMat_display(img, 18, 18);
-	int row_center = matrix_1ubyteMat_mean(img, 18, 18, ROW_AXIS);
-	int col_center = matrix_1ubyteMat_mean(img, 18, 18, COL_AXIS);
+	matrix_1ubyteMat_display(img, 20, 20);
+	int row_center = matrix_1ubyteMat_mean(img, 20, 20, ROW_AXIS);
+	int col_center = matrix_1ubyteMat_mean(img, 20, 20, COL_AXIS);
 	printf("Center: %dx%d\n", row_center, col_center);
 
-	img_final = matrix_1ubyteMat_add_frame(&img_final_rows, &img_final_cols, img, 18, 18, 5, 5, 5, 5);
+	img_final = matrix_1ubyteMat_add_frame(&img_final_rows, &img_final_cols, img, 20, 20, 4, 4, 4, 4);
 	free(img);
 
 	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
 	puts("---------------------------");
-	matrix_1ubyteMat_submat_move(img_final, img_final_rows, img_final_cols, 18, 18, 5, 5, row_center-9, col_center-9);
+	matrix_1ubyteMat_submat_move(img_final, img_final_rows, img_final_cols, 20, 20, 4, 4, row_center - 10, col_center - 10);
 	puts("---------------------------");
 	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
-	
+
 	puts("Move done");
 	dbg("new_size: %dx%d\n", img_final_rows, img_final_cols);
 	dbgexec(matrix_1ubyteMat_display(img_final, img_final_rows, img_final_cols));
-	
+
+	pixbuf = uint8_grayscale_to_gdk_pixbuf(img_final, img_final_rows, img_final_cols);
+	gui_display_image(pixbuf);	// show preprocessed image in result window
 
 	out_mat = matrix_new();
 	nn_recognise(img_final, out_mat);
@@ -235,8 +249,7 @@ static gboolean gui_button_press_event_cb(GtkWidget *widget, GdkEventButton *eve
 	} else if (event->button == GDK_BUTTON_SECONDARY) {
 		gui_clear_draw_surface();
 		gtk_widget_queue_draw(widget);
-	}
-	else if(event->button == GDK_BUTTON_MIDDLE){
+	} else if (event->button == GDK_BUTTON_MIDDLE) {
 		recognise_input(NULL, NULL);
 	}
 
@@ -331,7 +344,7 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	gtk_text_buffer_get_iter_at_line(result_buffer, &iter, 0);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter, "Draw a number\n", -1, "top_result", NULL);
 
-	g_signal_connect(result_window, "destroy", G_CALLBACK(gui_close), NULL);   // exit when the window is closed
+	g_signal_connect(result_window, "destroy", G_CALLBACK(gui_close), NULL);  // exit when the window is closed
 	gtk_widget_show_all(result_window);
 	gtk_window_move(GTK_WINDOW(result_window), 800, 300);
 }
