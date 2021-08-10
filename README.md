@@ -17,25 +17,6 @@ Handwritten digits recognition in C using neural network trained using [MNIST da
 	- use `make clean && make release` to generate AppImage binary (you have to install `linuxdeploy` and other dependecies using `make install_tools` first)
 
 
-# Libraries
-Dependency of the libraries is in this order: `GUI -> ceural -> lag`. For documentation see source code or use IDE (for example vscode).
-
- - `lag` - [Linear Algebra library](#Lag)
- - `ceural` - [C neural network library](#Ceural)
-
-## Lag
-Library supports many operations but more development is needed because currently uses [OpenBLAS](https://github.com/xianyi/OpenBLAS) only for matrix multiplication and matrix transposition.
-
-### Naming
-- `mat` - stands for matrix
-- `ew` - stands for element wise
-
-### Notes
-- Matrix part of the library automatically checks if destination and source is same where shouldn't be same and warns using `assert()`.
-
-## Ceural
-Ceural library is created for multi-layer networks trained using MNIST dataset but with small modifications it can be used for other datasets too. See [Accuracy](#Accuracy) for more info.
-
 # GUI
 ![GUI](./data/assets/C-digit-recognition-example-of-usage.jpg)
 
@@ -55,6 +36,28 @@ Preprocessing used in [MNIST](http://yann.lecun.com/exdb/mnist/) database: *The 
 6. **computation of the center of mass of the pixels** - is done using mean values accross X & Y
 7. **move of the submatrix** - submatrix (drawn number) is moved in the framed image
 8. **neural network forward propagation** - this preprocessed image is fed to the neural network
+
+
+# Libraries
+Dependency of the libraries is in this order: `GUI -> ceural -> lag`. For documentation see source code or use IDE (for example vscode).
+
+ - `lag` - [Linear Algebra library](#Lag)
+ - `ceural` - [C neural network library](#Ceural)
+
+## Lag
+Library supports many operations but more development is needed because currently uses [OpenBLAS](https://github.com/xianyi/OpenBLAS) only for matrix multiplication and matrix transposition.
+
+### Naming
+- `mat` - stands for matrix
+- `ew` - stands for element wise
+
+### Notes
+- Matrix part of the library automatically checks if destination and source is same where shouldn't be same and warns using `assert()`.
+
+## Ceural
+Ceural library is created for multi-layer networks trained using MNIST dataset but with small modifications it can be used for other datasets too. See [Accuracy](#Accuracy) for more info.
+
+
 
 # Accuracy
 After `10` epochs of training with batch size `32` the test set accuracy is `97.47 %` which is not bad considering the test error rate in [MNIST database website](http://yann.lecun.com/exdb/mnist/) of the 2-layer NN. Sadly accuracy is not as good in practice as it's in the test data set 🥺.
