@@ -22,7 +22,7 @@ void nn_init() {
 	ceural_net_create(&nn, &nn_def);
 
 	dbgln("Loading NN...");
-	if (ceural_net_load_from_file(&nn, NN_DATA_FILENAME) != CEURAL_OK) nn_train();
+	if (ceural_net_load_from_file(&nn, NULL) != CEURAL_OK) nn_train();   // NN_DATA_FILENAME // NULL = load from the binary
 }
 
 

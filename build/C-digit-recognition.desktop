@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Development
+Terminal=false
+Exec=main
+Name=C digit recognition
+Icon=C-digit-recognition_icon
+X-AppImage-Version=8fa601c

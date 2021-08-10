@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Categories=Development
+Terminal=false
+Exec=crecog
+Name=C digit recognition
+Icon=C-digit-recognition_icon

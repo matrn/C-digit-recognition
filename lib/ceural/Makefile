@@ -4,12 +4,10 @@ LDFLAGS+=-lm -llag ${RESOURCES_FLAGS} #-Wl,-R../../obj
 
 
 ceural: main.c ceural.c activations.c mnist.c convert.c
-	#xxd -i data.ceural > include/trained_nn.h
 	cd ../lag && $(MAKE) lag.so
 	${CC} ${CFLAGS} -I../lag/include -L../../obj -o $@ $^ ${LDFLAGS}
 
-ceural.so: main.c ceural.c activations.c mnist.c convert.c ceural_trained_nn
-	#xxd -i data.ceural > include/trained_nn.h
+ceural.so: main.c ceural.c activations.c mnist.c convert.c
 	cd ../lag && $(MAKE) lag.so
 	${CC} ${CFLAGS} -I../lag/include -L../../obj -fPIC -shared -o ../../obj/lib$@ $^ ${LDFLAGS}
 
