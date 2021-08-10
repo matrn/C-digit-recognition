@@ -265,11 +265,11 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
  */
 void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size){
 	for(int epoch = 0; epoch < epochs; epoch ++){
-		printf("Epoch #%d\n", epoch +1);
+		printf("\nEpoch #%d\n", epoch +1);
 
 		int set_len = train_set->images->length;
 		//set_len = 5000;
-		puts("");
+		printf("\n");
 		for(int i = 0; i < set_len; i ++){
 			int batch_fin = i + batch_size;
 			ceural_net_reset_sums(nn);
@@ -462,7 +462,7 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, dou
  * @brief tries to load neural network from the file and validate its compatibility with passed neural network nn
  * 
  * @param[out] nn pointer to the neural network structure which will be filled with correct weights and biases
- * @param[in] filename filename of the ceural data file
+ * @param[in] filename filename of the ceural data file, use NULL to load trained model from the header file trained_nn.h
  * @return ceural_rtn returns CEURAL_OK if everything was successful, negative value otherwise (CEURAL_FILE_ERROR or CEURAL_PARSE_ERROR)
  */
 ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
@@ -470,7 +470,19 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 	int8_t buf[DOUBLE_SIZE > 4 ? DOUBLE_SIZE : 4];
 	uint16_t nn_size;
 
-	f = fopen(filename, "r");
+	#ifndef CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
+		if(filename){
+			dbgln("Loading trained model from file");
+			f = fopen(filename, "r");
+		}
+		else {
+			dbgln("Loading trained model from binary");
+			f = fmemopen(data_ceural, (unsigned long)(data_ceural_end-data_ceural), "r");
+		}
+	#else
+		f = fopen(filename, "r");
+	#endif
+	
 	if(!f) return CEURAL_FILE_ERROR;
 
 	// magic number

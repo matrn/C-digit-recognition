@@ -1,15 +1,16 @@
 CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG #-O2 -fomit-frame-pointer
-LDFLAGS+=-lm -llag -Wl,-R../../obj
+LDFLAGS+=-lm -llag -Wl,--format=binary -Wl,data.ceural -Wl,--format=default #-Wl,-R../../obj
 
 
 ceural: main.c ceural.c activations.c mnist.c convert.c
+	#xxd -i data.ceural > include/trained_nn.h
 	cd ../lag && $(MAKE) lag.so
 	${CC} ${CFLAGS} -I../lag/include -L../../obj -o $@ $^ ${LDFLAGS}
 
-ceural.so: main.c ceural.c activations.c mnist.c convert.c
+ceural.so: main.c ceural.c activations.c mnist.c convert.c ceural_trained_nn
+	#xxd -i data.ceural > include/trained_nn.h
 	cd ../lag && $(MAKE) lag.so
 	${CC} ${CFLAGS} -I../lag/include -L../../obj -fPIC -shared -o ../../obj/lib$@ $^ ${LDFLAGS}
-
 
 
 ceural_test: ceural

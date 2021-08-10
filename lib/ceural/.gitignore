@@ -2,3 +2,4 @@ ceural
 data.ceural
 parse_test
 main
+include/trained_nn.h

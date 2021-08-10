@@ -63,7 +63,7 @@ int main(){
 	cstop(forward_phase);
 
 	puts("Loading NN...");
-	ceural_net_load_from_file(&nn, "data.ceural");
+	printf("load rtn: %d\n", ceural_net_load_from_file(&nn, NULL)); //"data.ceural");
 
 	puts("Testing...");
 	ceural_net_test(&nn, &test_set);

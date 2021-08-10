@@ -8,31 +8,35 @@
 #include <stdlib.h>
 
 #include "mnist.h"
+//#include "trained_nn.h"
 
+//#define CEURAL_IGNORE_NN_INCOMPATIBILITY  // used when loading weights & biases from file
+//#define CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
 
-#define CEURAL_VERIFY_NN_COMPATIBILITY	// used when loading weights & biases from file
-
+#ifndef CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
+extern uint8_t data_ceural[] asm("_binary_data_ceural_start");
+extern uint8_t data_ceural_end[] asm("_binary_data_ceural_end");
+#endif
 
 #define CEURAL_OK 0
 #define CEURAL_FILE_ERROR -1
 #define CEURAL_PARSE_ERROR -2
 #define CEURAL_FILE_DATA_ERROR -3  // used when neural network data file has different NN definition than passed NN
 
+#ifdef CEURAL_IGNORE_NN_INCOMPATIBILITY
+#define CEURAL_NN_INCOMPATIBLE(msg)                           \
+	{                                                         \
+		dbgerrln("Ignoring neural networks incompatibility"); \
+		dbgln(msg);                                           \
+	}
 
-#ifdef CEURAL_VERIFY_NN_COMPATIBILITY
-	#define CEURAL_NN_INCOMPATIBLE(msg)    \
-		{                                  \
-			dbgln(msg);                    \
-			return CEURAL_FILE_DATA_ERROR; \
-		}
 #else
-	#define CEURAL_NN_INCOMPATIBLE(msg)                           \
-		{                                                         \
-			dbgerrln("Ignoring neural networks incompatibility"); \
-			dbgln(msg);                                           \
-		}
+#define CEURAL_NN_INCOMPATIBLE(msg)    \
+	{                                  \
+		dbgln(msg);                    \
+		return CEURAL_FILE_DATA_ERROR; \
+	}
 #endif
-
 
 typedef int8_t ceural_rtn;
 
