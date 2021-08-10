@@ -629,7 +629,7 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t* out, matrix_t* a, uint8_t* b, ma
 		int N = cols;
 		int K = a->c;
 		MATRIX_TYPE *b_cp  = malloc(rows*cols*sizeof(MATRIX_TYPE));
-		for(int i = 0; i < rows*cols; i ++) b_cp[i] = b[i];
+		for(int i = 0; i < rows*cols; i ++) b_cp[i] = b[i];   // it's awful but can it be better?
 		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1.0, a->data, K, b_cp, N, 0.0, out->data, N);
 		free(b_cp);
 	#else	

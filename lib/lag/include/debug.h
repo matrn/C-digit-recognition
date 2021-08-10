@@ -4,6 +4,9 @@
 #include <stdio.h>
 #include <time.h>
 
+//#define DEBUG
+//#define TM_DEBUG
+
 
 #ifdef DEBUG
 	#define dbg(fmt, ...) printf(fmt, __VA_ARGS__)
@@ -24,7 +27,6 @@
 #endif
 
 
-//#define TM_DEBUG
 
 typedef clock_t dbg_tm;
 

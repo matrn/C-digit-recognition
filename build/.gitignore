@@ -1,3 +1,5 @@
 *.AppImage
 AppRun
 .DirIcon
+C-digit-recognition.desktop
+C-digit-recognition_icon.png

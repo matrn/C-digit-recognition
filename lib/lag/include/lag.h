@@ -17,6 +17,6 @@
 
 
 void random_seed(unsigned int seed);
-
+void blas_set_num_threads(int num);
 
 #endif

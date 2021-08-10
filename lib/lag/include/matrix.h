@@ -18,6 +18,7 @@
 #define MATRIX_USE_BLAS
 
 
+
 #ifdef MATRIX_USE_DOUBLE
 	#define MATRIX_TYPE double
 #endif
@@ -25,6 +26,7 @@
 	#define MATRIX_TYPE float
 	#define cblas_dgemm cblas_sgemm
 	#define cblas_dimatcopy cblas_simatcopy
+	#define cblas_domatcopy cblas_somatcopy
 #endif
 
 

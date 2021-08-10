@@ -5,6 +5,10 @@ install_tools:
 	sudo apt install patchelf
 	sudo apt install libopenblas-dev
 
+	#sudo apt install doxygen
+	#sudo apt install graphviz
+	#sudo npm install moxygen -g
+
 
 release:
 	cd ./src && $(MAKE) main
@@ -26,3 +30,4 @@ clean:
 	rm -f ./build/usr/lib/*
 	rm -f ./build/usr/bin/*
 	rm -f ./build/AppRun
+	rm -f C_digit_recognition-*.AppImage 

@@ -8,3 +8,7 @@
 void random_seed(unsigned int seed){
 	srand(seed);
 }
+
+void blas_set_num_threads(int num){
+	openblas_set_num_threads(num);
+}
