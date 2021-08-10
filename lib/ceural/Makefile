@@ -1,6 +1,6 @@
-CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG #-O2 -fomit-frame-pointer
+CFLAGS+=-g -pedantic -Wall -Werror -O2 -fomit-frame-pointer -DDEBUG #-DCEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
 RESOURCES_FLAGS+=-Wl,--format=binary -Wl,data.ceural -Wl,--format=default   # used for including trained NN model into binary
-LDFLAGS+=-lm -llag ${RESOURCES_FLAGS} #-Wl,-R../../obj
+LDFLAGS+=-lm -llag ${RESOURCES_FLAGS} -Wl,-R../../obj
 
 
 ceural: main.c ceural.c activations.c mnist.c convert.c

@@ -264,8 +264,11 @@ void ceural_net_update_weigts(ceural_net_t * nn, double learning_rate, uint16_t 
  * @param[in] batch_size size of batches
  */
 void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epochs, uint16_t batch_size){
+	time_t epoch_start;
+
 	for(int epoch = 0; epoch < epochs; epoch ++){
 		printf("\nEpoch #%d\n", epoch +1);
+		epoch_start = time(NULL);
 
 		int set_len = train_set->images->length;
 		//set_len = 5000;
@@ -286,6 +289,7 @@ void ceural_net_train(ceural_net_t * nn, mnist_set_t * train_set, uint16_t epoch
 			printf("\ri: %6d. ", i);
 			fflush(stdout);
 		}
+		printf("\nEpoch took %ld seconds\n", time(NULL)-epoch_start);
 	}
 }
 
@@ -376,8 +380,6 @@ ceural_rtn ceural_net_save_to_file(ceural_net_t * nn, const char * filename, dou
 
 	f = fopen(filename, "w");
 	if(!f) return CEURAL_FILE_ERROR;
-	
-
 	
 
 	// magic number
