@@ -2,7 +2,7 @@
 Version=1.0
 Type=Application
 Categories=Development
-Terminal=false
+Terminal=true
 Exec=crecog
 Name=C digit recognition
 Icon=C-digit-recognition_icon

@@ -5,6 +5,7 @@ Handwritten digits recognition in C using neural network trained using [MNIST da
 # Installation
 
 ## Linux
+- `sudo apt install libopenblas-dev`
 - `sudo apt install libgtk-3-dev`
 - `make`
 

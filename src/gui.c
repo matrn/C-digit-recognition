@@ -152,11 +152,11 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 	img_final = matrix_1ubyteMat_add_frame(&img_final_rows, &img_final_cols, img, 20, 20, 4, 4, 4, 4);
 	free(img);
 
-	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
-	puts("---------------------------");
+	dbgexec(matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols));
+	dbgln("---------------------------");
 	matrix_1ubyteMat_submat_move(img_final, img_final_rows, img_final_cols, 20, 20, 4, 4, row_center - 10, col_center - 10);
-	puts("---------------------------");
-	matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols);
+	dbgln("---------------------------");
+	dbgexec(matrix_1ubyteMat_print(img_final, img_final_rows, img_final_cols));
 
 	puts("Move done");
 	dbg("new_size: %dx%d\n", img_final_rows, img_final_cols);
@@ -275,6 +275,9 @@ static void crecog_gui_activate(GtkApplication *app, gpointer user_data) {
 	GtkTextIter iter;
 	GtkWidget *result_view;
 
+	puts("GUI init\n");
+	fflush(stdout);
+
 	nn_init();
 	//nn_test();
 
@@ -353,9 +356,11 @@ int crecog_gui_setup(int argc, char **argv) {
 	GtkApplication *app;
 	int status;
 
+	puts("Starting application setup...");
 	app = gtk_application_new(GUI_APP_NAME, G_APPLICATION_FLAGS_NONE);
 	g_signal_connect(app, "activate", G_CALLBACK(crecog_gui_activate), NULL);
 	status = g_application_run(G_APPLICATION(app), argc, argv);
+	puts("Dostroying application...");
 	g_object_unref(app);
 
 	return status;

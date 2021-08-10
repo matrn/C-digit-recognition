@@ -294,15 +294,23 @@ matrix_rtn matrix_multiply(matrix_t* out, const matrix_t* a, const matrix_t* b) 
 
 	matrix_resize(out, a->r, b->c);
 
-	for (int row = 0; row < a->r; row++) {
-		for (int col = 0; col < b->c; col++) {
-			MATRIX_TYPE sum = 0;
-			for (int r = 0; r < b->r; r++) {
-				sum += matrix_atv(a, row, r) * matrix_atv(b, r, col);
+	#ifdef MATRIX_USE_BLAS
+		int M = a->r;
+		int N = b->c;
+		int K = a->c;
+		// see: https://petewarden.files.wordpress.com/2015/04/gemm_corrected.png
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1.0, a->data, K, b->data, N, 0.0, out->data, N);	
+	#else
+		for (int row = 0; row < a->r; row++) {
+			for (int col = 0; col < b->c; col++) {
+				MATRIX_TYPE sum = 0;
+				for (int r = 0; r < b->r; r++) {
+					sum += matrix_atv(a, row, r) * matrix_atv(b, r, col);
+				}
+				*matrix_at(out, row, col) = sum;
 			}
-			*matrix_at(out, row, col) = sum;
 		}
-	}
+	#endif
 
 	return MATRIX_OK;
 }
@@ -616,20 +624,30 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t* out, matrix_t* a, uint8_t* b, ma
 
 	matrix_resize(out, a->r, cols);
 
-	for (int row = 0; row < a->r; row++) {
-		for (int col = 0; col < cols; col++) {
-			MATRIX_TYPE sum = 0;
-			for (int r = 0; r < rows; r++) {
-				//printf("index: %d\n", c*cols+col);
-				//printf("val: %d\n", b[c*cols+col]);
-				if (b[r * cols + col] == 0) continue;
-				sum += matrix_atv(a, row, r) * b[r * cols + col];
+	#ifdef MATRIX_USE_BLAS
+		int M = a->r;
+		int N = cols;
+		int K = a->c;
+		MATRIX_TYPE *b_cp  = malloc(rows*cols*sizeof(MATRIX_TYPE));
+		for(int i = 0; i < rows*cols; i ++) b_cp[i] = b[i];
+		cblas_dgemm(CblasRowMajor, CblasNoTrans, CblasNoTrans, M, N, K, 1.0, a->data, K, b_cp, N, 0.0, out->data, N);
+		free(b_cp);
+	#else	
+		for (int row = 0; row < a->r; row++) {
+			for (int col = 0; col < cols; col++) {
+				MATRIX_TYPE sum = 0;
+				for (int r = 0; r < rows; r++) {
+					//printf("index: %d\n", c*cols+col);
+					//printf("val: %d\n", b[c*cols+col]);
+					if (b[r * cols + col] == 0) continue;
+					sum += matrix_atv(a, row, r) * b[r * cols + col];
+				}
+				//printf("%dx%d: %f\n", row, col, sum);
+				//printf("val: %f\n", *matrix_at(out, row, col));
+				*matrix_at(out, row, col) = sum;
 			}
-			//printf("%dx%d: %f\n", row, col, sum);
-			//printf("val: %f\n", *matrix_at(out, row, col));
-			*matrix_at(out, row, col) = sum;
 		}
-	}
+	#endif
 
 	return MATRIX_OK;
 }
@@ -641,42 +659,59 @@ matrix_rtn matrix_multiply_r1ubyteMat(matrix_t* out, matrix_t* a, uint8_t* b, ma
  * @param[in] src 
  */
 void matrix_transpose(matrix_t* dst, matrix_t* src) {  //double m[], const unsigned h, const unsigned w){
-	if (src->r == 1 || src->c == 1) {
-		if (dst == src) {
-			//dbgln("Dst == src");
-		} else {
-			matrix_copy(dst, src);
+	#ifdef MATRIX_USE_BLAS
+		if(dst == src){
+			// in-place matrix transposition
+			cblas_dimatcopy(CblasRowMajor, CblasTrans, src->r, src->c, 1.0, src->data, src->c, src->r);
+
+			//swap dimensions
+			matrix_size_t r = src->r;
+			src->r = src->c;
+			src->c = r;
 		}
+		else{
+			// out-of-place matrix transposition
+			matrix_resize(dst, src->c, src->r);
+			cblas_domatcopy(CblasRowMajor, CblasTrans, src->r, src->c, 1.0, src->data, src->c, dst->data, src->r);
+		}
+	#else
+		if (src->r == 1 || src->c == 1) {
+			if (dst == src) {
+				//dbgln("Dst == src");
+			} else {
+				matrix_copy(dst, src);
+			}
+			matrix_size_t tmp = dst->r;
+			dst->r = dst->c;
+			dst->c = tmp;
+			return;
+		}
+
+		matrix_copy(dst, src);
 		matrix_size_t tmp = dst->r;
 		dst->r = dst->c;
 		dst->c = tmp;
-		return;
-	}
 
-	matrix_copy(dst, src);
-	matrix_size_t tmp = dst->r;
-	dst->r = dst->c;
-	dst->c = tmp;
-
-	// from: https://softwareengineering.stackexchange.com/a/271722/327700
-	for (unsigned start = 0; start <= src->c * src->r - 1; ++start) {
-		unsigned next = start;
-		unsigned i = 0;
-		do {
-			++i;
-			next = (next % src->r) * src->c + next / src->r;
-		} while (next > start);
-
-		if (next >= start && i != 1) {
-			const double tmp = dst->data[start];
-			next = start;
+		// from: https://softwareengineering.stackexchange.com/a/271722/327700
+		for (unsigned start = 0; start <= src->c * src->r - 1; ++start) {
+			unsigned next = start;
+			unsigned i = 0;
 			do {
-				i = (next % src->r) * src->c + next / src->r;
-				dst->data[next] = (i == start) ? tmp : dst->data[i];
-				next = i;
+				++i;
+				next = (next % src->r) * src->c + next / src->r;
 			} while (next > start);
+
+			if (next >= start && i != 1) {
+				const double tmp = dst->data[start];
+				next = start;
+				do {
+					i = (next % src->r) * src->c + next / src->r;
+					dst->data[next] = (i == start) ? tmp : dst->data[i];
+					next = i;
+				} while (next > start);
+			}
 		}
-	}
+	#endif
 }
 
 void matrix_1ubyteMat_calculate_crop(int* width_start, int* width_stop, int* height_start, int* height_stop, const uint8_t* mat, const matrix_size_t rows, const matrix_size_t cols, const uint8_t pixel_bytes, const uint8_t null_values[]) {

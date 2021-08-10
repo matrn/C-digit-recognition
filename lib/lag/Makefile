@@ -1,5 +1,5 @@
-CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG
-LDFLAGS+=-lm
+CFLAGS+=-g -pedantic -Wall -Werror -DDEBUG #-I /opt/OpenBLAS/include/ -L /opt/OpenBLAS/lib/
+LDFLAGS+=-lm -lopenblas #-Wl,-R/opt/OpenBLAS/lib/
 
 lag.o: matrix.c
 	echo "lag.o"

@@ -8,10 +8,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <cblas.h>
 
 #include "debug.h"
 
-#define MATRIX_TYPE double
+#define MATRIX_USE_DOUBLE
+//#define MATRIX_USE_FLOAT
+
+#define MATRIX_USE_BLAS
+
+
+#ifdef MATRIX_USE_DOUBLE
+	#define MATRIX_TYPE double
+#endif
+#ifdef MATRIX_USE_FLOAT
+	#define MATRIX_TYPE float
+	#define cblas_dgemm cblas_sgemm
+	#define cblas_dimatcopy cblas_simatcopy
+#endif
+
 
 #define MATRIX_WRONG_SIZE -1
 #define MATRIX_OK 0
