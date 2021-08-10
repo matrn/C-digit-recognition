@@ -1001,8 +1001,8 @@ matrix_size_t matrix_1ubyteMat_mean(const uint8_t* mat, const matrix_size_t rows
 			break;
 	}
 
-	printf("m_sum: %d\n", m_sum);
-	printf("mr_sum: %d\n", mr_sum);
+	//printf("m_sum: %d\n", m_sum);
+	//printf("mr_sum: %d\n", mr_sum);
 	return round((double)mr_sum / m_sum);
 }
 

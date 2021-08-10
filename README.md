@@ -36,6 +36,7 @@ Library supports many operations but more development is needed because currentl
 Ceural library is created for multi-layer networks trained using MNIST dataset but with small modifications it can be used for other datasets too. See [Accuracy](#Accuracy) for more info.
 
 # GUI
+![GUI](./data/assets/C-digit-recognition-example-of-usage.jpg)
 
 ## Control
 - `left mouse button & drag` to draw
@@ -67,16 +68,11 @@ Even though Python is much slower than C, Python-digit-recognition is faster. Th
 # ToDo
 - [ ] add `lag` tests
 - [ ] add `ceural` tests
-- [x] Cleanup & document `lag` library
-- [x] Cleanup & document `ceural` library
 - [ ] Cleanup & document `gui`
 - [ ] Add icons into `gui`
 - [ ] Add command line options to train & test & save & load NN
-- [x] Check NN definition during the NN weights & biases load process
 - [ ] Create documentation
-- [x] Write everything into README
 - [ ] Choose license
-- [x] Finish top-level 'Makefile' to create final binary for linux
 - [ ] Create Windows compilation script & test it on Windows
 - [x] Center digit by center of mass of the pixels before feeding it to the neural network from GUI input
 - [ ] Use BLAS (for example [OpenBLAS](https://github.com/xianyi/OpenBLAS)) library for linear algebra to improve speed
@@ -88,3 +84,4 @@ Even though Python is much slower than C, Python-digit-recognition is faster. Th
 - [George Hotz's AI notebook](https://github.com/geohot/ai-notebooks/blob/master/mnist_from_scratch.ipynb)
 - [Michael Nielsen's book about neural networks and deep learning](http://neuralnetworksanddeeplearning.com/chap2.html)
 - [Artcile about backpropagation from Brilliant.org](https://brilliant.org/wiki/backpropagation/)
+- [Epoch vs Batch Size vs Iterations](https://towardsdatascience.com/epoch-vs-iterations-vs-batch-size-4dfb9c7ce9c9)

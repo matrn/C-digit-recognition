@@ -32,15 +32,15 @@ static void gui_display_results(const uint8_t results[], const double accuracies
 	sprintf(text, "%d", results[0]);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", "green", NULL);
 
-	sprintf(text, ", accuracy: %.2f %%\n", accuracies[0]);
+	sprintf(text, ", confidence: %.1f %%\n", accuracies[0]);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "top_result", NULL);
 
 	// 2. result
-	sprintf(text, "2.Result: %d, accuracy: %.2f %%\n", results[1], accuracies[1]);
+	sprintf(text, "2.Result: %d, confidence: %.1f %%\n", results[1], accuracies[1]);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "second_result", NULL);
 
 	// 3. result
-	sprintf(text, "3.Result: %d, accuracy: %.2f %%\n", results[2], accuracies[2]);
+	sprintf(text, "3.Result: %d, confidence: %.1f %%\n", results[2], accuracies[2]);
 	gtk_text_buffer_insert_with_tags_by_name(result_buffer, &iter_start, text, -1, "result_format", "third_result", NULL);
 }
 
@@ -105,7 +105,7 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 
 	img = gdk_pixbuf_to_uint8_grayscale(pixbuf);  // convert image to the grayscale img
 
-	matrix_1ubyteMat_display(img, 20, 20);
+	//matrix_1ubyteMat_display(img, 20, 20);
 	int row_center = matrix_1ubyteMat_mean(img, 20, 20, ROW_AXIS);
 	int col_center = matrix_1ubyteMat_mean(img, 20, 20, COL_AXIS);
 	printf("Center: %dx%d\n", row_center, col_center);
@@ -121,7 +121,7 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 
 	puts("Move done");
 	dbg("new_size: %dx%d\n", img_final_rows, img_final_cols);
-	dbgexec(matrix_1ubyteMat_display(img_final, img_final_rows, img_final_cols));
+	matrix_1ubyteMat_display(img_final, img_final_rows, img_final_cols);
 
 	pixbuf = uint8_grayscale_to_gdk_pixbuf(img_final, img_final_rows, img_final_cols);
 	gui_display_image(pixbuf);	// show preprocessed image in result window
@@ -130,15 +130,15 @@ static void recognise_input(GtkWidget *widget, gpointer data) {
 	nn_recognise(img_final, out_mat);
 
 	results[0] = matrix_argmax(out_mat);
-	accuracies[0] = matrix_max(out_mat);
+	accuracies[0] = matrix_max(out_mat)*100;
 	*matrix_at_index(out_mat, results[0]) = -1;
 
 	results[1] = matrix_argmax(out_mat);
-	accuracies[1] = matrix_max(out_mat);
+	accuracies[1] = matrix_max(out_mat)*100;
 	*matrix_at_index(out_mat, results[1]) = -1;
 
 	results[2] = matrix_argmax(out_mat);
-	accuracies[2] = matrix_max(out_mat);
+	accuracies[2] = matrix_max(out_mat)*100;
 	*matrix_at_index(out_mat, results[2]) = -1;
 
 	dbg("RESULT: %d\n", results[0]);

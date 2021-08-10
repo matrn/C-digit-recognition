@@ -527,9 +527,9 @@ ceural_rtn ceural_net_load_from_file(ceural_net_t * nn, const char * filename){
 
 	// train accuracy
 	if(fread(&buf, 2, 1, f) != 1) return CEURAL_PARSE_ERROR;
-	dbgexec(double test_accuracy = MSB_2bytes_to_int16(buf)/100.0);
+	double test_accuracy = MSB_2bytes_to_int16(buf)/100.0;
 
-	dbg("Network was tested with accuracy: %.2f %%\n", test_accuracy);
+	printf("Network was tested with accuracy: %.2f %%\n", test_accuracy);
 
 	// weights and biases
 	for(int i = 0; i < nn_size; i ++){
