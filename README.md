@@ -18,7 +18,8 @@ Handwritten digits recognition in C using neural network trained using [MNIST da
 
 
 # Libraries
-Dependency of the libraries is in this order: `GUI -> ceural -> lag`
+Dependency of the libraries is in this order: `GUI -> ceural -> lag`. For documentation see source code or use IDE (for example vscode).
+
  - `lag` - [Linear Algebra library](#Lag)
  - `ceural` - [C neural network library](#Ceural)
 
@@ -68,14 +69,13 @@ Even though Python is much slower than C, Python-digit-recognition is faster. Th
 # ToDo
 - [ ] add `lag` tests
 - [ ] add `ceural` tests
-- [ ] Cleanup & document `gui`
+- [ ] Use BLAS (for example [OpenBLAS](https://github.com/xianyi/OpenBLAS)) library for linear algebra in more functions to improve speed
 - [ ] Add icons into `gui`
 - [ ] Add command line options to train & test & save & load NN
-- [ ] Create documentation
+- [ ] Create `lag` & `ceural` docs
 - [ ] Choose license
 - [ ] Create Windows compilation script & test it on Windows
 - [x] Center digit by center of mass of the pixels before feeding it to the neural network from GUI input
-- [ ] Use BLAS (for example [OpenBLAS](https://github.com/xianyi/OpenBLAS)) library for linear algebra to improve speed
 - [ ] Look into possible accuracy improvements
 
 
