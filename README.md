@@ -1,5 +1,5 @@
 # C-digit-recognition
-Handwritten digits recognition in C using neural network trained using [MNIST database](http://yann.lecun.com/exdb/mnist/).
+Handwritten digits recognition written in C using neural network trained with [MNIST database](http://yann.lecun.com/exdb/mnist/).
 
 
 # Installation
