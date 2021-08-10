@@ -8,10 +8,9 @@
 #include <stdlib.h>
 
 #include "mnist.h"
-//#include "trained_nn.h"
 
 //#define CEURAL_IGNORE_NN_INCOMPATIBILITY  // used when loading weights & biases from file
-//#define CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
+//#define CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL   // uncomment to disable embedded trained model load
 
 #ifndef CEURAL_DISABLE_EMBEDDED_TRAINED_MODEL
 extern uint8_t data_ceural[] asm("_binary_data_ceural_start");
