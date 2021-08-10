@@ -58,7 +58,6 @@ Library supports many operations but more development is needed because currentl
 Ceural library is created for multi-layer networks trained using MNIST dataset but with small modifications it can be used for other datasets too. See [Accuracy](#Accuracy) for more info.
 
 
-
 # Accuracy
 After `10` epochs of training with batch size `32` the test set accuracy is `97.47 %` which is not bad considering the test error rate in [MNIST database website](http://yann.lecun.com/exdb/mnist/) of the 2-layer NN. Sadly accuracy is not as good in practice as it's in the test data set 🥺.
 
