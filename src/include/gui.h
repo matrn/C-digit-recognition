@@ -7,6 +7,7 @@
 #include <lag.h>
 
 #include "nn.h"
+#include "utils.h"
 
 #define GUI_APP_NAME "org.gtk.c-digit-recognition"
 #define GUI_MAIN_WINDOW_NAME "C digit recognition"

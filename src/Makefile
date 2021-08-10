@@ -4,7 +4,7 @@ GTKFLAGS+=`pkg-config gtk+-3.0 --cflags`
 GTKLIBS+=`pkg-config gtk+-3.0 --libs`
 
 
-main: main.c gui.c nn.c 
+main: main.c gui.c utils.c nn.c
 	cd ../lib/ceural && $(MAKE) ceural.so
 	${CC} ${CFLAGS} ${GTKFLAGS} -I../lib/ceural/include -I../lib/lag/include $^ -o $@ ${GTKLIBS} ${LDFLAGS}
 

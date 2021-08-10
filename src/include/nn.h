@@ -1,7 +1,6 @@
 #ifndef NN_H
 #define NN_H
 
-//#include "../../lib/ceural/include/ceural.h"
 #include <ceural.h>
 
 ceural_net_t nn;
