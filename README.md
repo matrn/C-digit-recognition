@@ -13,7 +13,7 @@ Handwritten digits recognition written in C using neural network trained with [M
 - `sudo apt install libopenblas-dev` - installs OpenBLAS library
 - `sudo apt install libgtk-3-dev` - installs
 - compilation:
-	- use `cd src && make clean && make main && ./main` to run normal compilation
+	- if you don't have any trained data file `./lib/ceural/data.ceural`, copy sample on using `cp ./data/data.ceural ./lib/ceural/data.ceural` and then use `cd src && make clean && make main && ./main` to run normal compilation
 	- use `make clean && make release` to generate AppImage binary (you have to install `linuxdeploy` and other dependecies using `make install_tools` first)
 
 
