@@ -84,6 +84,7 @@ Even though Python is much slower than C, Python-digit-recognition is faster. Th
 
 # Resources
 - [MNIST database](http://yann.lecun.com/exdb/mnist/)
+- [3b1b's videos about neural networks and deep learning](https://www.youtube.com/playlist?list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi)
 - [George Hotz's AI notebook](https://github.com/geohot/ai-notebooks/blob/master/mnist_from_scratch.ipynb)
 - [Michael Nielsen's book about neural networks and deep learning](http://neuralnetworksanddeeplearning.com/chap2.html)
 - [Artcile about backpropagation from Brilliant.org](https://brilliant.org/wiki/backpropagation/)
