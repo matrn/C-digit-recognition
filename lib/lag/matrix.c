@@ -1,5 +1,13 @@
 #include "include/matrix.h"
 
+/* 
+  memory representation of the matrix data array:
+	example for the 3x2 matrix:
+		1 2
+		3 4  -> 1 2 3 4 5 6
+		5 6
+*/
+
 /**
  * @brief allocates new matrix on heap memory and sets default parameters
  * 
